@@ -304,6 +304,13 @@ input:focus {
   font-weight: 700;
 }
 
+.chip.with-avatar {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding-left: 0.35rem;
+}
+
 .chip.off {
   opacity: 0.45;
   text-decoration: line-through;

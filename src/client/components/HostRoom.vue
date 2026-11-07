@@ -3,6 +3,7 @@ import { computed, onBeforeUnmount, onMounted, watch } from 'vue'
 import type { GameSummary, HostSnapshot } from '../../shared/types'
 import { useGameSocket } from '../composables/useGameSocket'
 import AnswerButton from './AnswerButton.vue'
+import AvatarView from './Avatar.vue'
 import ConnectionStatus from './ConnectionStatus.vue'
 import Countdown from './Countdown.vue'
 import Leaderboard from './Leaderboard.vue'
@@ -20,6 +21,8 @@ watch(sock.error, (err) => {
   if (err?.code === 'not_allowed') emit('unauthorized')
 })
 
+const advanceLabel = computed(() => (snap.value?.hasNextQuestion ? 'Další otázka' : 'Vyhlásit výsledky'))
+
 const nextLabel = computed(() => {
   switch (snap.value?.phase) {
     case 'question':
@@ -27,7 +30,7 @@ const nextLabel = computed(() => {
     case 'reveal':
       return 'Zobrazit žebříček'
     case 'leaderboard':
-      return snap.value.hasNextQuestion ? 'Další otázka' : 'Vyhlásit výsledky'
+      return advanceLabel.value
     default:
       return ''
   }
@@ -43,6 +46,13 @@ function next() {
   sock.send({ type: 'next', phase: s.phase, questionIndex: question.value.index })
 }
 
+/** From the reveal screen straight to the next question (or the podium), skipping the leaderboard. */
+function skipLeaderboard() {
+  const s = snap.value
+  if (!s || !question.value || s.phase !== 'reveal') return
+  sock.send({ type: 'next', phase: 'reveal', questionIndex: question.value.index, skipLeaderboard: true })
+}
+
 function reset() {
   if (snap.value?.phase === 'lobby' && snap.value.players.length === 0) return
   if (confirm('Opravdu vyprázdnit místnost? Všichni hráči budou odpojeni a skóre smazáno.')) sock.send({ type: 'reset' })
@@ -50,6 +60,11 @@ function reset() {
 
 function onKey(e: KeyboardEvent) {
   if (e.target instanceof HTMLInputElement || e.target instanceof HTMLButtonElement) return
+  if (e.code === 'ArrowRight' && snap.value?.phase === 'reveal') {
+    e.preventDefault()
+    skipLeaderboard()
+    return
+  }
   if (e.code === 'Space' || e.code === 'ArrowRight' || e.code === 'Enter') {
     e.preventDefault()
     if (snap.value?.phase === 'lobby') start()
@@ -92,12 +107,14 @@ const maxCount = computed(() => Math.max(1, ...(snap.value?.answerCounts ?? [0])
         <span
           v-for="p in snap.players"
           :key="p.id"
-          class="chip"
+          class="chip with-avatar"
           :class="{ off: !p.connected }"
           :title="p.connected ? 'Připojen' : 'Odpojen'"
           data-testid="player-chip"
-          >{{ p.nickname }}</span
         >
+          <AvatarView :avatar="p.avatar" :size="32" />
+          {{ p.nickname }}
+        </span>
       </div>
       <button class="primary" style="margin-top: 2rem; font-size: 1.3rem" :disabled="snap.players.length === 0" data-testid="start-button" @click="start">
         Spustit hru
@@ -137,7 +154,10 @@ const maxCount = computed(() => Math.max(1, ...(snap.value?.answerCounts ?? [0])
           readonly
         />
       </div>
-      <button class="primary" style="align-self: center" data-testid="next-button" @click="next">{{ nextLabel }}</button>
+      <div class="row" style="justify-content: center">
+        <button class="primary" data-testid="skip-button" @click="skipLeaderboard">{{ advanceLabel }} →</button>
+        <button class="ghost" data-testid="next-button" @click="next">{{ nextLabel }}</button>
+      </div>
     </section>
 
     <!-- Leaderboard -->

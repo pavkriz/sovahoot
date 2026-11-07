@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { GameEngine } from './game-engine'
+import { GameEngine, type EngineState } from './game-engine'
+import { DEFAULT_AVATAR } from '../shared/avatars'
 import type { Game } from '../shared/types'
 
 const game: Game = {
@@ -38,7 +39,7 @@ describe('lobby & joining', () => {
     const e = new GameEngine(game)
     expect(e.join('p1', '  Alice ')).toEqual({ ok: true })
     expect(e.snapshotFor('host', null, T0).players).toEqual([
-      { id: 'p1', nickname: 'Alice', score: 0, connected: true },
+      { id: 'p1', nickname: 'Alice', avatar: DEFAULT_AVATAR, score: 0, connected: true },
     ])
   })
 
@@ -68,6 +69,28 @@ describe('lobby & joining', () => {
     const e = started()
     expect(e.join('p3', 'Carol')).toEqual({ ok: true })
     expect(e.snapshotFor('host', null, T0).players).toHaveLength(3)
+  })
+
+  it('stores a normalised avatar and exposes it in every read model', () => {
+    const e = new GameEngine(game)
+    e.join('p1', 'Alice', { character: '🦊', hat: '👑', glasses: null, color: '#118ab2' })
+    e.join('p2', 'Bob', { character: '💣', hat: 'x', glasses: '👓', color: 'red' } as never)
+    const host = e.snapshotFor('host', null, T0)
+    expect(host.players[0]?.avatar).toEqual({ character: '🦊', hat: '👑', glasses: null, color: '#118ab2' })
+    expect(host.players[1]?.avatar).toEqual({ ...DEFAULT_AVATAR, glasses: '👓' })
+    expect(e.snapshotFor('player', 'p1', T0).me?.avatar.character).toBe('🦊')
+    e.start('s', T0)
+    e.closeQuestion(T0)
+    expect(e.leaderboard()[0]?.avatar).toBeDefined()
+  })
+
+  it('hydrates older persisted players without an avatar', () => {
+    const e = new GameEngine(game)
+    e.join('p1', 'Alice')
+    const state = JSON.parse(JSON.stringify(e.toState())) as { players: Array<Record<string, unknown>> }
+    delete state.players[0]!.avatar
+    const copy = GameEngine.fromState(game, state as unknown as EngineState)
+    expect(copy.snapshotFor('host', null, T0).players[0]?.avatar).toEqual(DEFAULT_AVATAR)
   })
 
   it('disconnect does not remove the player', () => {
@@ -203,6 +226,37 @@ describe('phase transitions', () => {
     expect(e.phase).toBe('reveal')
     expect(e.next('reveal', 1, T0)).toBe(false)
     expect(e.phase).toBe('reveal')
+  })
+
+  it('next with skipLeaderboard jumps from reveal straight to the next question', () => {
+    const e = started()
+    e.next('question', 0, T0)
+    expect(e.next('reveal', 0, T0 + 5000, { skipLeaderboard: true })).toBe(true)
+    expect(e.phase).toBe('question')
+    expect(e.questionIndex).toBe(1)
+    expect(e.questionEndsAt).toBe(T0 + 5000 + 10_000)
+  })
+
+  it('next with skipLeaderboard on the last question goes to the podium', () => {
+    const e = started()
+    e.next('question', 0, T0)
+    e.next('reveal', 0, T0, { skipLeaderboard: true })
+    e.next('question', 1, T0)
+    expect(e.next('reveal', 1, T0, { skipLeaderboard: true })).toBe(true)
+    expect(e.phase).toBe('podium')
+  })
+
+  it('skipLeaderboard changes nothing outside reveal and respects the idempotence guard', () => {
+    const e = started()
+    expect(e.next('reveal', 0, T0, { skipLeaderboard: true })).toBe(false)
+    expect(e.phase).toBe('question')
+    e.next('question', 0, T0)
+    expect(e.next('reveal', 1, T0, { skipLeaderboard: true })).toBe(false)
+    expect(e.phase).toBe('reveal')
+    e.next('reveal', 0, T0)
+    expect(e.phase).toBe('leaderboard')
+    expect(e.next('leaderboard', 0, T0, { skipLeaderboard: true })).toBe(true)
+    expect(e.phase).toBe('question')
   })
 
   it('reset clears players and returns to lobby', () => {

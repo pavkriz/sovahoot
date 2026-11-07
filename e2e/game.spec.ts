@@ -23,12 +23,16 @@ async function openHost(browser: Browser): Promise<Page> {
   return page
 }
 
-async function joinAsPlayer(browser: Browser, nickname: string): Promise<Page> {
+async function joinAsPlayer(browser: Browser, nickname: string, avatar?: { character: number; hat: number }): Promise<Page> {
   const context = await browser.newContext({ viewport: { width: 390, height: 844 } })
   const page = await context.newPage()
   await page.goto('/')
   await page.getByTestId('pin-input').fill(PIN)
   await page.getByTestId('nickname-input').fill(nickname)
+  if (avatar) {
+    await page.getByTestId(`avatar-character-${avatar.character}`).click()
+    await page.getByTestId(`avatar-hat-${avatar.hat}`).click()
+  }
   await page.getByTestId('join-button').click()
   await expect(page.getByTestId('my-nickname')).toHaveText(nickname)
   return page
@@ -36,9 +40,12 @@ async function joinAsPlayer(browser: Browser, nickname: string): Promise<Page> {
 
 test('host and two players play a whole game, one player reloads mid-question', async ({ browser }) => {
   const host = await openHost(browser)
-  const alice = await joinAsPlayer(browser, 'Alice')
+  const alice = await joinAsPlayer(browser, 'Alice', { character: 1, hat: 1 }) // 🦊 with 👑
   const bob = await joinAsPlayer(browser, 'Bob')
   await expect(host.getByTestId('player-count')).toHaveText('Hráčů: 2')
+  const aliceChip = host.getByTestId('player-chip').filter({ hasText: 'Alice' })
+  await expect(aliceChip).toContainText('🦊')
+  await expect(aliceChip).toContainText('👑')
 
   // Question 1: Alice right, Bob wrong → closes as soon as both answered.
   await host.getByTestId('start-button').click()
@@ -70,11 +77,12 @@ test('host and two players play a whole game, one player reloads mid-question', 
   await alice.getByTestId('answer-1').click()
   await bob.getByTestId('answer-0').click()
   await expect(host.locator('main')).toHaveAttribute('data-phase', 'reveal')
-  await host.getByTestId('next-button').click() // → leaderboard
-  await expect(host.getByTestId('next-button')).toHaveText('Vyhlásit výsledky')
-  await host.getByTestId('next-button').click() // → podium
+  // Last question: skip the leaderboard and announce the results directly.
+  await expect(host.getByTestId('skip-button')).toContainText('Vyhlásit výsledky')
+  await host.getByTestId('skip-button').click() // → podium
 
   await expect(host.getByTestId('podium')).toContainText('Alice')
+  await expect(host.getByTestId('podium')).toContainText('🦊')
   await expect(alice.getByTestId('final-rank')).toContainText('1. místo')
   await expect(bob.getByTestId('final-rank')).toContainText('2. místo')
 

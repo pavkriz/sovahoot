@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { randomAvatar } from '../../shared/avatars'
+import AvatarPicker from '../components/AvatarPicker.vue'
 import { forgetPlayer, loadPlayer, savePlayer } from '../session'
 
 const route = useRoute()
@@ -9,6 +11,7 @@ const router = useRouter()
 const existing = loadPlayer()
 const pin = ref(typeof route.query.pin === 'string' ? route.query.pin : (existing?.pin ?? ''))
 const nickname = ref(existing?.nickname ?? '')
+const avatar = ref(existing?.avatar ?? randomAvatar())
 const localError = ref('')
 
 const errorTexts: Record<string, string> = {
@@ -33,7 +36,7 @@ async function submit() {
   }
   // A rejected nickname means the old identity must not be reused.
   if (route.query.error === 'nickname_taken' || route.query.error === 'invalid_nickname') forgetPlayer()
-  savePlayer(n, p)
+  savePlayer(n, p, avatar.value)
   await router.push('/play')
 }
 </script>
@@ -44,7 +47,7 @@ async function submit() {
       🦉 Sovahoot
       <small>kvíz pro chytré sovy</small>
     </div>
-    <form class="card stack" @submit.prevent="submit">
+    <form class="card stack" style="max-width: 460px" @submit.prevent="submit">
       <input
         v-model="pin"
         data-testid="pin-input"
@@ -63,6 +66,7 @@ async function submit() {
         autocomplete="off"
         aria-label="Přezdívka"
       />
+      <AvatarPicker v-model="avatar" />
       <p v-if="error" class="error" data-testid="join-error">{{ error }}</p>
       <button class="primary" type="submit" data-testid="join-button">Vstoupit do hry</button>
     </form>

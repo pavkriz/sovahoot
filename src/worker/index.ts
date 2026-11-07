@@ -39,6 +39,8 @@ async function roomFor(
     if (!playerId && needPlayerId) return { error: Response.json({ error: 'Chybí playerId.' }, { status: 400 }) }
     if (playerId) params.set('playerId', playerId)
     params.set('nickname', c.req.query('nickname') ?? '')
+    const avatar = c.req.query('avatar')
+    if (avatar) params.set('avatar', avatar)
   }
   const stub = c.env.GAME_ROOM.get(c.env.GAME_ROOM.idFromName(pin))
   return { stub, params }

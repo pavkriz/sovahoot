@@ -1,5 +1,6 @@
 import { env, evictDurableObject, runDurableObjectAlarm } from 'cloudflare:test'
 import { beforeEach, describe, expect, it } from 'vitest'
+import { DEFAULT_AVATAR, encodeAvatar } from '../../src/shared/avatars'
 import type { HostSnapshot, PlayerSnapshot, ScoreRow } from '../../src/shared/types'
 import { fetchWorker, hostPath, hostToken, playerPath, resetRoom, WsClient } from './helpers'
 
@@ -109,6 +110,44 @@ describe('game flow over websockets', () => {
     const reveal = (await alice2.until((s) => s.phase === 'reveal')) as PlayerSnapshot
     expect(reveal.me?.score).toBeGreaterThan(0)
     ;[host, alice2, bob].forEach((c) => c.close())
+  })
+
+  it('carries the chosen avatar to everyone and sanitises invalid ones', async () => {
+    const token = await hostToken()
+    const host = await WsClient.connect(hostPath(PIN, token))
+    await host.until((s) => s.phase === 'lobby')
+    const fox = { character: '🦊', hat: '👑', glasses: null, color: '#118ab2' }
+    const alice = await WsClient.connect(playerPath(PIN, 'p-alice', 'Alice', encodeAvatar(fox)))
+    const bob = await WsClient.connect(playerPath(PIN, 'p-bob', 'Bob', '{"character":"💣","hat":"👑"}'))
+    const lobby = await host.until((s) => s.players.length === 2)
+    expect(lobby.players.find((p) => p.id === 'p-alice')?.avatar).toEqual(fox)
+    expect(lobby.players.find((p) => p.id === 'p-bob')?.avatar).toEqual({ ...DEFAULT_AVATAR, hat: '👑' })
+    const mine = (await alice.until((s) => s.players.length === 2)) as PlayerSnapshot
+    expect(mine.me?.avatar).toEqual(fox)
+    ;[host, alice, bob].forEach((c) => c.close())
+  })
+
+  it('lets the host skip the leaderboard and go straight to the next question or the podium', async () => {
+    const { host, alice, bob } = await setup()
+    host.send({ type: 'start', phase: 'lobby' })
+    await alice.until((s) => s.phase === 'question')
+    alice.send({ type: 'answer', questionIndex: 0, answerIndex: 0 })
+    bob.send({ type: 'answer', questionIndex: 0, answerIndex: 1 })
+    await host.until((s) => s.phase === 'reveal')
+
+    host.send({ type: 'next', phase: 'reveal', questionIndex: 0, skipLeaderboard: true })
+    const q2 = await bob.until((s) => s.phase === 'question' && s.question?.index === 1)
+    expect(q2.questionEndsAt).toBeGreaterThan(q2.serverNow)
+
+    alice.send({ type: 'answer', questionIndex: 1, answerIndex: 1 })
+    bob.send({ type: 'answer', questionIndex: 1, answerIndex: 1 })
+    await host.until((s) => s.phase === 'reveal' && s.question?.index === 1)
+    host.send({ type: 'next', phase: 'reveal', questionIndex: 1, skipLeaderboard: true })
+    const podium = await host.until((s) => s.phase === 'podium')
+    expect(podium.leaderboard[0]?.avatar).toBeDefined()
+    const rows = (await env.DB.prepare('SELECT nickname FROM scores ORDER BY rank').all<{ nickname: string }>()).results
+    expect(rows.map((r) => r.nickname)).toEqual(['Alice', 'Bob'])
+    ;[host, alice, bob].forEach((c) => c.close())
   })
 
   it('rejects a second player with the same nickname', async () => {

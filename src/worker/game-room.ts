@@ -2,6 +2,7 @@
 // WebSockets (hibernation API), the question deadline alarm, persistence and the D1 write-out.
 
 import { DurableObject } from 'cloudflare:workers'
+import { decodeAvatar, type Avatar } from '../shared/avatars'
 import { findGameByPin } from '../shared/games'
 import type { ClientMessage, ErrorCode, Role, ServerMessage } from '../shared/types'
 import { GameEngine, type EngineState } from './game-engine'
@@ -54,12 +55,13 @@ export class GameRoom extends DurableObject<Env> {
     const role: Role = url.searchParams.get('role') === 'host' ? 'host' : 'player'
     const playerId = url.searchParams.get('playerId')
     const nickname = url.searchParams.get('nickname') ?? ''
+    const avatar = decodeAvatar(url.searchParams.get('avatar'))
 
     switch (url.pathname) {
       case '/ws':
-        return this.openWebSocket(request, engine, role, playerId, nickname)
+        return this.openWebSocket(request, engine, role, playerId, nickname, avatar)
       case '/snapshot': {
-        if (role === 'player' && playerId) await this.joinOrReconnect(engine, playerId, nickname)
+        if (role === 'player' && playerId) await this.joinOrReconnect(engine, playerId, nickname, avatar)
         return json(engine.snapshotFor(role, playerId, Date.now()))
       }
       case '/command': {
@@ -94,6 +96,7 @@ export class GameRoom extends DurableObject<Env> {
     role: Role,
     playerId: string | null,
     nickname: string,
+    avatar: Avatar,
   ): Promise<Response> {
     if (request.headers.get('Upgrade')?.toLowerCase() !== 'websocket') {
       return json({ error: 'expected websocket' }, 426)
@@ -105,7 +108,7 @@ export class GameRoom extends DurableObject<Env> {
     server.serializeAttachment(attachment)
 
     if (role === 'player' && playerId) {
-      const result = await this.joinOrReconnect(engine, playerId, nickname)
+      const result = await this.joinOrReconnect(engine, playerId, nickname, avatar)
       if (!result.ok) {
         send(server, { type: 'error', code: result.code, message: errorText(result.code) })
         server.close(4000, result.code)
@@ -117,9 +120,9 @@ export class GameRoom extends DurableObject<Env> {
     return new Response(null, { status: 101, webSocket: client })
   }
 
-  private async joinOrReconnect(engine: GameEngine, playerId: string, nickname: string) {
+  private async joinOrReconnect(engine: GameEngine, playerId: string, nickname: string, avatar: Avatar) {
     return this.mutateWith(() => {
-      const result = engine.join(playerId, nickname)
+      const result = engine.join(playerId, nickname, avatar)
       return { changed: result.ok, result }
     })
   }
@@ -160,7 +163,7 @@ export class GameRoom extends DurableObject<Env> {
       case 'start':
         return this.mutate(() => msg.phase === engine.phase && engine.start(crypto.randomUUID(), now))
       case 'next':
-        return this.mutate(() => engine.next(msg.phase, msg.questionIndex, now))
+        return this.mutate(() => engine.next(msg.phase, msg.questionIndex, now, { skipLeaderboard: msg.skipLeaderboard === true }))
       case 'reset':
         return this.mutate(() => {
           engine.reset()

@@ -11,6 +11,8 @@ export interface GameSocketOptions {
   role: Role
   playerId?: string
   nickname?: string
+  /** Already encoded with `encodeAvatar`. */
+  avatar?: string
   token?: string
   /** Heartbeat period; the server answers pings without waking the room. */
   pingIntervalMs?: number
@@ -73,6 +75,7 @@ export function useGameSocket(opts: GameSocketOptions): GameSocket {
     } else {
       if (opts.playerId) p.set('playerId', opts.playerId)
       if (opts.nickname) p.set('nickname', opts.nickname)
+      if (opts.avatar) p.set('avatar', opts.avatar)
     }
     return p
   }

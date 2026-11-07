@@ -1,5 +1,9 @@
 // Types shared by the Worker (authority) and the Vue client.
 
+import type { Avatar } from './avatars'
+
+export type { Avatar } from './avatars'
+
 export type Phase = 'lobby' | 'question' | 'reveal' | 'leaderboard' | 'podium'
 
 export type Role = 'player' | 'host'
@@ -39,6 +43,7 @@ export interface PublicQuestion {
 export interface PlayerPublic {
   id: string
   nickname: string
+  avatar: Avatar
   score: number
   connected: boolean
 }
@@ -46,6 +51,7 @@ export interface PlayerPublic {
 export interface LeaderboardEntry {
   id: string
   nickname: string
+  avatar: Avatar
   score: number
   rank: number
   /** Points gained in the most recent question. */
@@ -55,6 +61,7 @@ export interface LeaderboardEntry {
 export interface MyState {
   id: string
   nickname: string
+  avatar: Avatar
   score: number
   rank: number
   /** Answer picked for the current question, null if none yet. */
@@ -110,8 +117,11 @@ export type ClientMessage =
   | { type: 'answer'; questionIndex: number; answerIndex: number }
   /** Host: lobby → first question. `phase` is the phase the host believes it is in (idempotence). */
   | { type: 'start'; phase: Phase }
-  /** Host: advance one step from the given phase/question (idempotence). */
-  | { type: 'next'; phase: Phase; questionIndex: number }
+  /**
+   * Host: advance one step from the given phase/question (idempotence).
+   * With `skipLeaderboard`, a `next` from `reveal` goes straight to the next question (or the podium).
+   */
+  | { type: 'next'; phase: Phase; questionIndex: number; skipLeaderboard?: boolean }
   /** Host: back to an empty lobby. */
   | { type: 'reset' }
   | { type: 'ping' }

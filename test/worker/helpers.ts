@@ -125,8 +125,10 @@ export class WsClient {
   }
 }
 
-export function playerPath(pin: string, playerId: string, nickname: string): string {
-  return `/ws/${pin}?role=player&playerId=${encodeURIComponent(playerId)}&nickname=${encodeURIComponent(nickname)}`
+export function playerPath(pin: string, playerId: string, nickname: string, avatar?: string): string {
+  const q = new URLSearchParams({ role: 'player', playerId, nickname })
+  if (avatar) q.set('avatar', avatar)
+  return `/ws/${pin}?${q}`
 }
 
 export function hostPath(pin: string, token: string): string {

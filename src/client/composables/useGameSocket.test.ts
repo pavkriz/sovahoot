@@ -130,6 +130,13 @@ describe('useGameSocket', () => {
     expect(sock.serverNow()).toBe(Date.now() + 1500)
   })
 
+  it('adds the encoded avatar to the connection url when given', () => {
+    create({ avatar: '{"character":"🦊"}' })
+    expect(FakeWebSocket.last.url).toBe(
+      'ws://game.test/ws/0000?role=player&playerId=p1&nickname=Alice&avatar=%7B%22character%22%3A%22%F0%9F%A6%8A%22%7D',
+    )
+  })
+
   it('reconnects with exponential backoff after the socket drops', () => {
     create()
     FakeWebSocket.last.open()

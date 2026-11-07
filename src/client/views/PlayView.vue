@@ -2,7 +2,9 @@
 import { computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import type { PlayerSnapshot } from '../../shared/types'
+import { encodeAvatar } from '../../shared/avatars'
 import AnswerButton, { type AnswerState } from '../components/AnswerButton.vue'
+import AvatarView from '../components/Avatar.vue'
 import ConnectionStatus from '../components/ConnectionStatus.vue'
 import Countdown from '../components/Countdown.vue'
 import Leaderboard from '../components/Leaderboard.vue'
@@ -19,6 +21,7 @@ const sock = useGameSocket({
   role: 'player',
   playerId: session?.playerId,
   nickname: session?.nickname,
+  avatar: session ? encodeAvatar(session.avatar) : undefined,
 })
 
 watch(sock.error, (err) => {
@@ -60,6 +63,7 @@ const rankText = computed(() => (me.value && me.value.rank > 0 ? `${me.value.ran
     <!-- Lobby -->
     <template v-else-if="snap.phase === 'lobby'">
       <h1>Jsi ve hře!</h1>
+      <AvatarView v-if="me" :avatar="me.avatar" :size="120" />
       <p class="chip" data-testid="my-nickname">{{ me?.nickname }}</p>
       <p class="muted" style="color: rgba(255, 255, 255, 0.8)">
         {{ snap.title }} · hráčů: {{ snap.players.length }}<br />
@@ -123,6 +127,7 @@ const rankText = computed(() => (me.value && me.value.rank > 0 ? `${me.value.ran
     <!-- Podium -->
     <template v-else-if="snap.phase === 'podium'">
       <h1>Konec hry</h1>
+      <AvatarView v-if="me" :avatar="me.avatar" :size="96" />
       <p data-testid="final-rank">Skončil(a) jsi na <strong>{{ rankText }}</strong> s {{ me?.score ?? 0 }} body.</p>
       <Podium :entries="snap.leaderboard" />
       <router-link to="/" class="ghost" style="margin-top: 1.5rem">Zpět na začátek</router-link>

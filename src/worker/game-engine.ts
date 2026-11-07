@@ -1,6 +1,7 @@
 // Pure, deterministic game rules. No I/O, no timers: callers pass `now` (ms since epoch).
 // The Durable Object wraps this class and persists `toState()` after every mutation.
 
+import { normalizeAvatar, type Avatar } from '../shared/avatars'
 import type {
   ErrorCode,
   Game,
@@ -28,6 +29,7 @@ interface AnswerRecord {
 interface PlayerRecord {
   id: string
   nickname: string
+  avatar: Avatar
   score: number
   connected: boolean
   /** Keyed by question index. */
@@ -77,6 +79,8 @@ export class GameEngine {
   }
 
   static fromState(game: Game, state: EngineState): GameEngine {
+    // Older persisted rooms have players without an avatar.
+    for (const p of state.players) p.avatar = normalizeAvatar(p.avatar)
     return new GameEngine(game, state)
   }
 
@@ -114,7 +118,7 @@ export class GameEngine {
 
   // ---- players -------------------------------------------------------------
 
-  join(playerId: string, rawNickname: string): JoinResult {
+  join(playerId: string, rawNickname: string, avatar?: Avatar): JoinResult {
     const existing = this.find(playerId)
     if (existing) {
       // Reconnect: identity is the playerId, the nickname stays what it was.
@@ -129,7 +133,7 @@ export class GameEngine {
     if (this.s.players.some((p) => p.nickname.toLowerCase() === lower)) {
       return { ok: false, code: 'nickname_taken' }
     }
-    this.s.players.push({ id: playerId, nickname, score: 0, connected: true, answers: {} })
+    this.s.players.push({ id: playerId, nickname, avatar: normalizeAvatar(avatar), score: 0, connected: true, answers: {} })
     return { ok: true }
   }
 
@@ -151,24 +155,35 @@ export class GameEngine {
     return true
   }
 
-  /** Advance one step. The expected phase/question guard makes replays and double-clicks harmless. */
-  next(expectedPhase: Phase, expectedQuestionIndex: number, now: number): boolean {
+  /**
+   * Advance one step. The expected phase/question guard makes replays and double-clicks harmless.
+   * `skipLeaderboard` lets the host jump from `reveal` straight to the next question or the podium.
+   */
+  next(expectedPhase: Phase, expectedQuestionIndex: number, now: number, { skipLeaderboard = false } = {}): boolean {
     if (expectedPhase !== this.s.phase || expectedQuestionIndex !== this.s.questionIndex) return false
     switch (this.s.phase) {
       case 'question':
         return this.closeQuestion(now)
       case 'reveal':
-        this.s.phase = 'leaderboard'
+        if (skipLeaderboard) {
+          this.advanceFromLeaderboard(now)
+        } else {
+          this.s.phase = 'leaderboard'
+        }
         return true
       case 'leaderboard':
-        if (this.hasNextQuestion) {
-          this.openQuestion(this.s.questionIndex + 1, now)
-        } else {
-          this.s.phase = 'podium'
-        }
+        this.advanceFromLeaderboard(now)
         return true
       default:
         return false
+    }
+  }
+
+  private advanceFromLeaderboard(now: number): void {
+    if (this.hasNextQuestion) {
+      this.openQuestion(this.s.questionIndex + 1, now)
+    } else {
+      this.s.phase = 'podium'
     }
   }
 
@@ -214,6 +229,7 @@ export class GameEngine {
       .map((p, i) => ({
         id: p.id,
         nickname: p.nickname,
+        avatar: p.avatar,
         score: p.score,
         rank: i + 1,
         lastGain: p.answers[qi]?.gain ?? 0,
@@ -241,6 +257,7 @@ export class GameEngine {
     const players: PlayerPublic[] = this.s.players.map((p) => ({
       id: p.id,
       nickname: p.nickname,
+      avatar: p.avatar,
       score: p.score,
       connected: p.connected,
     }))
@@ -302,6 +319,7 @@ export class GameEngine {
     return {
       id: p.id,
       nickname: p.nickname,
+      avatar: p.avatar,
       score: p.score,
       rank,
       answerIndex: a?.answerIndex ?? null,

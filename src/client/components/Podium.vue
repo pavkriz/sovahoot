@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { LeaderboardEntry } from '../../shared/types'
+import AvatarView from './Avatar.vue'
 
 const props = defineProps<{ entries: LeaderboardEntry[] }>()
 
@@ -19,6 +20,7 @@ const medals: Record<number, string> = { 1: '🥇', 2: '🥈', 3: '🥉' }
 <template>
   <div class="podium" data-testid="podium">
     <div v-for="s in slots" :key="s.place" class="slot">
+      <AvatarView :avatar="s.entry!.avatar" :size="s.place === 1 ? 72 : 56" />
       <div class="name">{{ s.entry!.nickname }}</div>
       <div class="score">{{ s.entry!.score }}</div>
       <div class="block" :style="{ height: `${s.height}px` }">{{ medals[s.place] }}</div>
@@ -38,6 +40,9 @@ const medals: Record<number, string> = { 1: '🥇', 2: '🥈', 3: '🥉' }
 .slot {
   flex: 1;
   text-align: center;
+}
+.slot :deep(.avatar) {
+  margin-bottom: 0.4rem;
 }
 .name {
   font-weight: 800;

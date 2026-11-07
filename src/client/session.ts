@@ -1,10 +1,13 @@
 // Tiny persistence layer. The player identity lives in localStorage so a reload or a dropped
 // connection never loses the seat; the host token lives in sessionStorage.
 
+import { normalizeAvatar, type Avatar } from '../shared/avatars'
+
 export interface PlayerSession {
   playerId: string
   nickname: string
   pin: string
+  avatar: Avatar
 }
 
 const KEY = 'sovahoot.player'
@@ -24,16 +27,17 @@ export function loadPlayer(): PlayerSession | null {
     if (!raw) return null
     const parsed = JSON.parse(raw) as Partial<PlayerSession>
     if (!parsed.playerId || !parsed.nickname || !parsed.pin) return null
-    return parsed as PlayerSession
+    return { playerId: parsed.playerId, nickname: parsed.nickname, pin: parsed.pin, avatar: normalizeAvatar(parsed.avatar) }
   }, null)
 }
 
-export function savePlayer(nickname: string, pin: string): PlayerSession {
+export function savePlayer(nickname: string, pin: string, avatar: Avatar): PlayerSession {
   const existing = loadPlayer()
   const session: PlayerSession = {
     playerId: existing?.playerId ?? crypto.randomUUID(),
     nickname,
     pin,
+    avatar: normalizeAvatar(avatar),
   }
   safe(() => localStorage.setItem(KEY, JSON.stringify(session)), undefined)
   return session
