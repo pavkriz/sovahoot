@@ -1,0 +1,124 @@
+import type { Game, GameSummary } from './types'
+
+const DEFAULT_LIMIT = 20
+
+// Hardcoded games. PINs are fixed and reused every session; the host resets the room between runs.
+export const GAMES: Game[] = [
+  {
+    id: 'sovy',
+    pin: '1234',
+    title: 'Sovy a příroda',
+    questions: [
+      {
+        text: 'Jak se jmenuje největší sova žijící v Česku?',
+        answers: ['Výr velký', 'Puštík obecný', 'Kalous ušatý', 'Sýček obecný'],
+        correctIndex: 0,
+        timeLimitSec: DEFAULT_LIMIT,
+      },
+      {
+        text: 'Kolik krčních obratlů má sova?',
+        answers: ['7', '14', '24', '33'],
+        correctIndex: 1,
+        timeLimitSec: DEFAULT_LIMIT,
+      },
+      {
+        text: 'Která sova byla atributem bohyně Athény a symbolem moudrosti?',
+        answers: ['Výr velký', 'Sova pálená', 'Sýček obecný', 'Puštík obecný'],
+        correctIndex: 2,
+        timeLimitSec: DEFAULT_LIMIT,
+      },
+      {
+        text: 'Díky čemu sovy létají téměř neslyšně?',
+        answers: ['Hřebínkům na okrajích letek', 'Létají jen ve větru', 'Velmi malým křídlům', 'Nelétají, skáčou'],
+        correctIndex: 0,
+        timeLimitSec: DEFAULT_LIMIT,
+      },
+      {
+        text: 'Co sovy po jídle vyvrhují?',
+        answers: ['Peří', 'Vývržky z kostí a srsti', 'Skořápky', 'Nic'],
+        correctIndex: 1,
+        timeLimitSec: DEFAULT_LIMIT,
+      },
+      {
+        text: 'O kolik stupňů dokáže sova otočit hlavu?',
+        answers: ['Asi 90°', 'Asi 180°', 'Asi 270°', 'Celých 360°'],
+        correctIndex: 2,
+        timeLimitSec: DEFAULT_LIMIT,
+      },
+    ],
+  },
+  {
+    id: 'prehled',
+    pin: '5678',
+    title: 'Všeobecný přehled',
+    questions: [
+      {
+        text: 'Jaké je hlavní město Austrálie?',
+        answers: ['Sydney', 'Melbourne', 'Perth', 'Canberra'],
+        correctIndex: 3,
+        timeLimitSec: DEFAULT_LIMIT,
+      },
+      {
+        text: 'Kolik je 7 × 8?',
+        answers: ['54', '64', '56', '58'],
+        correctIndex: 2,
+        timeLimitSec: 10,
+      },
+      {
+        text: 'Která řeka je v Česku nejdelší?',
+        answers: ['Labe', 'Morava', 'Vltava', 'Ohře'],
+        correctIndex: 2,
+        timeLimitSec: DEFAULT_LIMIT,
+      },
+      {
+        text: 'Jaká je chemická značka zlata?',
+        answers: ['Au', 'Ag', 'Fe', 'Zn'],
+        correctIndex: 0,
+        timeLimitSec: DEFAULT_LIMIT,
+      },
+      {
+        text: 'Kdo napsal Babičku?',
+        answers: ['Alois Jirásek', 'Karel Čapek', 'Jan Neruda', 'Božena Němcová'],
+        correctIndex: 3,
+        timeLimitSec: DEFAULT_LIMIT,
+      },
+      {
+        text: 'Která planeta sluneční soustavy je největší?',
+        answers: ['Saturn', 'Neptun', 'Jupiter', 'Země'],
+        correctIndex: 2,
+        timeLimitSec: DEFAULT_LIMIT,
+      },
+    ],
+  },
+  {
+    id: 'test',
+    pin: '0000',
+    title: 'Rychlý test (2 otázky)',
+    questions: [
+      {
+        text: 'Jakou barvu má nebe za jasného dne?',
+        answers: ['Modrou', 'Zelenou'],
+        correctIndex: 0,
+        timeLimitSec: 15,
+      },
+      {
+        text: 'Kolik nohou má pavouk?',
+        answers: ['6', '8', '10'],
+        correctIndex: 1,
+        timeLimitSec: 15,
+      },
+    ],
+  },
+]
+
+export function findGameByPin(pin: string): Game | undefined {
+  return GAMES.find((g) => g.pin === pin)
+}
+
+export function findGameById(id: string): Game | undefined {
+  return GAMES.find((g) => g.id === id)
+}
+
+export function gameSummaries(): GameSummary[] {
+  return GAMES.map((g) => ({ id: g.id, pin: g.pin, title: g.title, questionCount: g.questions.length }))
+}

@@ -1,0 +1,27 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "sovahoot",
+  "main": "src/worker/index.ts",
+  "compatibility_date": "2026-11-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    // Vue SPA built by Vite; every unknown path falls back to index.html.
+    "not_found_handling": "single-page-application",
+    // Only these prefixes hit the Worker; everything else is served as a static asset.
+    "run_worker_first": ["/api/*", "/ws/*"]
+  },
+  "durable_objects": {
+    "bindings": [{ "name": "GAME_ROOM", "class_name": "GameRoom" }]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["GameRoom"] }],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "sovahoot",
+      // Replace with the id printed by `wrangler d1 create sovahoot` (not a secret).
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "observability": { "enabled": true }
+}
