@@ -8,11 +8,10 @@ withDefaults(defineProps<{ avatar: Avatar; size?: number }>(), { size: 48 })
   <span
     class="avatar"
     :style="{ '--size': `${size}px`, background: avatar.color }"
-    :title="[avatar.character, avatar.hat, avatar.glasses].filter(Boolean).join(' ')"
+    :title="[avatar.character, avatar.hat].filter(Boolean).join(' ')"
     data-testid="avatar"
   >
     <span class="character emoji">{{ avatar.character }}</span>
-    <span v-if="avatar.glasses" class="glasses emoji">{{ avatar.glasses }}</span>
     <span v-if="avatar.hat" class="hat emoji">{{ avatar.hat }}</span>
   </span>
 </template>
@@ -32,13 +31,6 @@ withDefaults(defineProps<{ avatar: Avatar; size?: number }>(), { size: 48 })
 }
 .character {
   font-size: calc(var(--size) * 0.6);
-}
-.glasses {
-  position: absolute;
-  left: 50%;
-  top: 38%;
-  transform: translate(-50%, -50%);
-  font-size: calc(var(--size) * 0.38);
 }
 .hat {
   position: absolute;

@@ -73,11 +73,11 @@ describe('lobby & joining', () => {
 
   it('stores a normalised avatar and exposes it in every read model', () => {
     const e = new GameEngine(game)
-    e.join('p1', 'Alice', { character: '🦊', hat: '👑', glasses: null, color: '#118ab2' })
-    e.join('p2', 'Bob', { character: '💣', hat: 'x', glasses: '👓', color: 'red' } as never)
+    e.join('p1', 'Alice', { character: '🦊', hat: '👑', color: '#118ab2' })
+    e.join('p2', 'Bob', { character: '💣', hat: '🎓', color: 'red' } as never)
     const host = e.snapshotFor('host', null, T0)
-    expect(host.players[0]?.avatar).toEqual({ character: '🦊', hat: '👑', glasses: null, color: '#118ab2' })
-    expect(host.players[1]?.avatar).toEqual({ ...DEFAULT_AVATAR, glasses: '👓' })
+    expect(host.players[0]?.avatar).toEqual({ character: '🦊', hat: '👑', color: '#118ab2' })
+    expect(host.players[1]?.avatar).toEqual({ ...DEFAULT_AVATAR, hat: '🎓' })
     expect(e.snapshotFor('player', 'p1', T0).me?.avatar.character).toBe('🦊')
     e.start('s', T0)
     e.closeQuestion(T0)

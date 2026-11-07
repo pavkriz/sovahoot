@@ -116,7 +116,7 @@ describe('game flow over websockets', () => {
     const token = await hostToken()
     const host = await WsClient.connect(hostPath(PIN, token))
     await host.until((s) => s.phase === 'lobby')
-    const fox = { character: '🦊', hat: '👑', glasses: null, color: '#118ab2' }
+    const fox = { character: '🦊', hat: '👑', color: '#118ab2' }
     const alice = await WsClient.connect(playerPath(PIN, 'p-alice', 'Alice', encodeAvatar(fox)))
     const bob = await WsClient.connect(playerPath(PIN, 'p-bob', 'Bob', '{"character":"💣","hat":"👑"}'))
     const lobby = await host.until((s) => s.players.length === 2)

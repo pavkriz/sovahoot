@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { CHARACTERS, COLORS, GLASSES, HATS, randomAvatar, type Avatar } from '../../shared/avatars'
+import { CHARACTERS, COLORS, HATS, randomAvatar, type Avatar } from '../../shared/avatars'
 import AvatarView from './Avatar.vue'
 
 const model = defineModel<Avatar>({ required: true })
@@ -44,22 +44,6 @@ function set<K extends keyof Avatar>(key: K, value: Avatar[K]) {
         @click="set('hat', h)"
       >
         {{ h }}
-      </button>
-    </div>
-
-    <p class="label">Brýle</p>
-    <div class="grid">
-      <button type="button" class="opt" :class="{ on: model.glasses === null }" data-testid="avatar-glasses-none" @click="set('glasses', null)">✕</button>
-      <button
-        v-for="(g, i) in GLASSES"
-        :key="g"
-        type="button"
-        class="opt emoji"
-        :class="{ on: model.glasses === g }"
-        :data-testid="`avatar-glasses-${i}`"
-        @click="set('glasses', g)"
-      >
-        {{ g }}
       </button>
     </div>
 
