@@ -96,10 +96,11 @@ input:focus {
   outline-offset: 1px;
 }
 
-/* Emoji-only elements: prefer a colour emoji font over whatever the system falls back to.
-   Kept off the body stack because the web font's ranges also cover digits. */
+/* Emoji-only elements use the web Noto Color Emoji first so avatars look identical on every OS
+   (the @font-face wins over a same-named system font). Kept off the body stack because the web
+   font's ranges also cover digits. System emoji remain the fallback when Google Fonts is unreachable. */
 .emoji {
-  font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif;
+  font-family: 'Noto Color Emoji', 'Apple Color Emoji', 'Segoe UI Emoji', sans-serif;
   font-style: normal;
 }
 
