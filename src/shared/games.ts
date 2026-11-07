@@ -104,8 +104,8 @@ export const GAMES: Game[] = [
       },
       {
         // Final consonant is devoiced in speech ([hrat]), so it cannot be heard.
-        text: 'Doplň písmeno: hra_ (stojí na kopci, bydlel v něm král)',
-        answers: ['t', 'd'],
+        text: 'Doplň písmeno: HRA_',
+        answers: ['T', 'D'],
         correctIndex: 1,
         timeLimitSec: 30,
       },
