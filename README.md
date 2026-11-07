@@ -59,6 +59,10 @@ npx wrangler d1 execute sovahoot --local --command "select * from scores"
 
 Vyčištění lokálních místností a databáze: smazat adresář `.wrangler/state`.
 
+Známá drobnost: po úpravě `index.html` Vite restartuje server a stránka se pak může zaseknout při načítání
+předbalených závislostí (`vue.js`). Pomůže ukončit a znovu spustit `npm run dev`. Změny ve `src/` se načítají
+za běhu bez problémů.
+
 ## Nasazení na Cloudflare
 
 Jednorázově (v Cloudflare účtu):
