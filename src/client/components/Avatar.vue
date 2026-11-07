@@ -1,7 +1,18 @@
 <script setup lang="ts">
-import type { Avatar } from '../../shared/avatars'
+import { computed } from 'vue'
+import { hatPlacement, type Avatar } from '../../shared/avatars'
 
-withDefaults(defineProps<{ avatar: Avatar; size?: number }>(), { size: 48 })
+const props = withDefaults(defineProps<{ avatar: Avatar; size?: number }>(), { size: 48 })
+
+const hatStyle = computed(() => {
+  const p = hatPlacement(props.avatar.character, props.avatar.hat)
+  return {
+    '--hat-x': `${p.x * props.size}px`,
+    '--hat-y': `${p.y * props.size}px`,
+    '--hat-r': `${p.r}deg`,
+    '--hat-s': String(p.s),
+  }
+})
 </script>
 
 <template>
@@ -12,7 +23,7 @@ withDefaults(defineProps<{ avatar: Avatar; size?: number }>(), { size: 48 })
     data-testid="avatar"
   >
     <span class="character emoji">{{ avatar.character }}</span>
-    <span v-if="avatar.hat" class="hat emoji">{{ avatar.hat }}</span>
+    <span v-if="avatar.hat" class="hat emoji" :style="hatStyle">{{ avatar.hat }}</span>
   </span>
 </template>
 
@@ -36,7 +47,10 @@ withDefaults(defineProps<{ avatar: Avatar; size?: number }>(), { size: 48 })
   position: absolute;
   left: 50%;
   top: 0;
-  transform: translate(-50%, -55%) rotate(-8deg);
   font-size: calc(var(--size) * 0.4);
+  /* Anchor: hat centre on the top edge, then the per-character offset from hatPlacement(). */
+  transform: translate(calc(-50% + var(--hat-x)), calc(-50% + var(--hat-y))) rotate(var(--hat-r)) scale(var(--hat-s));
+  transform-origin: center;
+  pointer-events: none;
 }
 </style>
