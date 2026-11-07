@@ -56,7 +56,7 @@ onMounted(() => {
   <HostRoom v-if="token && selected" :game="selected" :token="token" @leave="selected = null" @unauthorized="logout" />
 
   <main v-else class="screen center">
-    <div class="logo">🦉 Sovahoot <small>moderátor</small></div>
+    <div class="logo"><span class="emoji">🦉</span> Sovahoot <small>moderátor</small></div>
 
     <form v-if="!token" class="card stack" @submit.prevent="login">
       <input v-model="password" type="password" placeholder="Heslo moderátora" data-testid="host-password" autocomplete="current-password" />

@@ -96,6 +96,13 @@ input:focus {
   outline-offset: 1px;
 }
 
+/* Emoji-only elements: prefer a colour emoji font over whatever the system falls back to.
+   Kept off the body stack because the web font's ranges also cover digits. */
+.emoji {
+  font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif;
+  font-style: normal;
+}
+
 /* ---- layout ---- */
 
 .screen {

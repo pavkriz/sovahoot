@@ -44,7 +44,7 @@ async function submit() {
 <template>
   <main class="screen center">
     <div class="logo">
-      🦉 Sovahoot
+      <span class="emoji">🦉</span> Sovahoot
       <small>kvíz pro chytré sovy</small>
     </div>
     <form class="card stack" style="max-width: 460px" @submit.prevent="submit">

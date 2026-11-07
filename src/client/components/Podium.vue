@@ -23,7 +23,7 @@ const medals: Record<number, string> = { 1: '🥇', 2: '🥈', 3: '🥉' }
       <AvatarView :avatar="s.entry!.avatar" :size="s.place === 1 ? 72 : 56" />
       <div class="name">{{ s.entry!.nickname }}</div>
       <div class="score">{{ s.entry!.score }}</div>
-      <div class="block" :style="{ height: `${s.height}px` }">{{ medals[s.place] }}</div>
+      <div class="block emoji" :style="{ height: `${s.height}px` }">{{ medals[s.place] }}</div>
     </div>
   </div>
 </template>

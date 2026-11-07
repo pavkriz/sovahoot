@@ -13,7 +13,7 @@ function set<K extends keyof Avatar>(key: K, value: Avatar[K]) {
   <div class="picker" data-testid="avatar-picker">
     <div class="preview">
       <AvatarView :avatar="model" :size="96" />
-      <button type="button" class="ghost small" data-testid="avatar-random" @click="model = randomAvatar()">🎲 Náhodně</button>
+      <button type="button" class="ghost small" data-testid="avatar-random" @click="model = randomAvatar()"><span class="emoji">🎲</span> Náhodně</button>
     </div>
 
     <p class="label">Postavička</p>
@@ -22,7 +22,7 @@ function set<K extends keyof Avatar>(key: K, value: Avatar[K]) {
         v-for="(c, i) in CHARACTERS"
         :key="c"
         type="button"
-        class="opt"
+        class="opt emoji"
         :class="{ on: model.character === c }"
         :data-testid="`avatar-character-${i}`"
         @click="set('character', c)"
@@ -38,7 +38,7 @@ function set<K extends keyof Avatar>(key: K, value: Avatar[K]) {
         v-for="(h, i) in HATS"
         :key="h"
         type="button"
-        class="opt"
+        class="opt emoji"
         :class="{ on: model.hat === h }"
         :data-testid="`avatar-hat-${i}`"
         @click="set('hat', h)"
@@ -54,7 +54,7 @@ function set<K extends keyof Avatar>(key: K, value: Avatar[K]) {
         v-for="(g, i) in GLASSES"
         :key="g"
         type="button"
-        class="opt"
+        class="opt emoji"
         :class="{ on: model.glasses === g }"
         :data-testid="`avatar-glasses-${i}`"
         @click="set('glasses', g)"

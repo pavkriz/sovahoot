@@ -11,9 +11,9 @@ withDefaults(defineProps<{ avatar: Avatar; size?: number }>(), { size: 48 })
     :title="[avatar.character, avatar.hat, avatar.glasses].filter(Boolean).join(' ')"
     data-testid="avatar"
   >
-    <span class="character">{{ avatar.character }}</span>
-    <span v-if="avatar.glasses" class="glasses">{{ avatar.glasses }}</span>
-    <span v-if="avatar.hat" class="hat">{{ avatar.hat }}</span>
+    <span class="character emoji">{{ avatar.character }}</span>
+    <span v-if="avatar.glasses" class="glasses emoji">{{ avatar.glasses }}</span>
+    <span v-if="avatar.hat" class="hat emoji">{{ avatar.hat }}</span>
   </span>
 </template>
 

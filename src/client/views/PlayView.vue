@@ -56,7 +56,7 @@ const rankText = computed(() => (me.value && me.value.rank > 0 ? `${me.value.ran
     <ConnectionStatus :status="sock.status.value" />
 
     <template v-if="!snap">
-      <p class="big">🦉</p>
+      <p class="big emoji">🦉</p>
       <p>Připojuji ke hře…</p>
     </template>
 
@@ -90,7 +90,7 @@ const rankText = computed(() => (me.value && me.value.rank > 0 ? `${me.value.ran
           </div>
         </template>
         <div v-else class="card" data-testid="answered">
-          <h2>Odpověď odeslána ✔</h2>
+          <h2>Odpověď odeslána <span class="emoji">✔</span></h2>
           <p class="muted">Teď už jen počkej, jak dopadli ostatní.</p>
         </div>
       </div>
@@ -99,7 +99,10 @@ const rankText = computed(() => (me.value && me.value.rank > 0 ? `${me.value.ran
     <!-- Reveal -->
     <template v-else-if="snap.phase === 'reveal' && question">
       <div class="stack" style="width: 100%; max-width: 720px; align-items: center">
-        <h1 data-testid="result">{{ me?.correct ? 'Správně! 🎉' : 'Bohužel špatně' }}</h1>
+        <h1 data-testid="result">
+          <template v-if="me?.correct">Správně! <span class="emoji">🎉</span></template>
+          <template v-else>Bohužel špatně</template>
+        </h1>
         <p class="big" data-testid="gain">+{{ me?.lastGain ?? 0 }}</p>
         <p>Celkem máš <strong data-testid="my-score">{{ me?.score ?? 0 }}</strong> bodů</p>
         <div class="answers" :class="{ many: question.answers.length > 2 }">

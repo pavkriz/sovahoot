@@ -22,7 +22,7 @@ const shapes = ['▲', '◆', '●', '■']
     :data-testid="`answer-${index}`"
     @click="$emit('pick', index)"
   >
-    <span class="shape">{{ shapes[index] }}</span>
+    <span class="shape emoji">{{ shapes[index] }}</span>
     <span>{{ text }}</span>
     <span v-if="state === 'correct'" class="mark">✓</span>
     <span v-else-if="state === 'wrong'" class="mark">✗</span>

@@ -84,7 +84,7 @@ const maxCount = computed(() => Math.max(1, ...(snap.value?.answerCounts ?? [0])
 
     <header class="row between" style="margin-bottom: 1rem">
       <div>
-        <strong>🦉 {{ game.title }}</strong>
+        <strong><span class="emoji">🦉</span> {{ game.title }}</strong>
         <span class="muted" style="color: rgba(255, 255, 255, 0.7)"> · PIN {{ game.pin }}</span>
       </div>
       <div class="row">
@@ -171,7 +171,7 @@ const maxCount = computed(() => Math.max(1, ...(snap.value?.answerCounts ?? [0])
 
     <!-- Podium -->
     <section v-else-if="snap.phase === 'podium'" class="screen center" style="min-height: 0; flex: 1; padding: 0">
-      <h1>Výsledky 🎉</h1>
+      <h1>Výsledky <span class="emoji">🎉</span></h1>
       <Podium :entries="snap.leaderboard" />
       <div class="card" style="margin-top: 1.5rem">
         <Leaderboard :entries="snap.leaderboard" :limit="100" :show-gain="false" />
