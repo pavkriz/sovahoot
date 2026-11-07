@@ -313,6 +313,21 @@ describe('snapshots', () => {
     expect(s.questionEndsAt).toBe(T0 + 20_000)
   })
 
+  it('passes a question image through to the public question, and omits it otherwise', () => {
+    const withImage: Game = {
+      ...game,
+      questions: [{ ...game.questions[0]!, image: '/img/x.svg' }, game.questions[1]!],
+    }
+    const e = new GameEngine(withImage)
+    e.join('p1', 'Alice')
+    e.start('s', T0)
+    expect(e.snapshotFor('player', 'p1', T0).question?.image).toBe('/img/x.svg')
+    expect(e.snapshotFor('host', null, T0).question?.image).toBe('/img/x.svg')
+    e.next('question', 0, T0)
+    e.next('reveal', 0, T0, { skipLeaderboard: true })
+    expect('image' in (e.snapshotFor('host', null, T0).question ?? {})).toBe(false)
+  })
+
   it('returns me = null for an unknown player', () => {
     const e = started()
     expect(e.snapshotFor('player', 'nobody', T0).me).toBeNull()

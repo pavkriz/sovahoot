@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 220" width="800" height="220" role="img" aria-label="Přímka s body K a E">
+  <rect width="800" height="220" rx="16" fill="#ffffff"/>
+  <!-- the line -->
+  <line x1="40" y1="90" x2="760" y2="90" stroke="#1f1f1f" stroke-width="8" stroke-linecap="round"/>
+  <!-- point marks -->
+  <line x1="240" y1="62" x2="240" y2="118" stroke="#1f1f1f" stroke-width="8" stroke-linecap="round"/>
+  <line x1="560" y1="62" x2="560" y2="118" stroke="#1f1f1f" stroke-width="8" stroke-linecap="round"/>
+  <!-- labels below the line -->
+  <text x="240" y="190" font-family="system-ui, Arial, sans-serif" font-size="72" font-weight="700" fill="#1f1f1f" text-anchor="middle">K</text>
+  <text x="560" y="190" font-family="system-ui, Arial, sans-serif" font-size="72" font-weight="700" fill="#1f1f1f" text-anchor="middle">E</text>
+</svg>

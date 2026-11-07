@@ -91,6 +91,33 @@ export const GAMES: Game[] = [
     ],
   },
   {
+    id: 'trida-3a',
+    pin: '3333',
+    title: 'Kvíz pro 3.A',
+    questions: [
+      {
+        text: 'Na jakou stranu směřuje polopřímka ⟼KE?',
+        image: '/img/poloprimka-ke.svg',
+        answers: ['Doleva', 'Doprava', 'Nahoru', 'Dolů'],
+        correctIndex: 1,
+        timeLimitSec: 30,
+      },
+      {
+        // Final consonant is devoiced in speech ([hrat]), so it cannot be heard.
+        text: 'Doplň písmeno: hra_ (stojí na kopci, bydlel v něm král)',
+        answers: ['t', 'd'],
+        correctIndex: 1,
+        timeLimitSec: 30,
+      },
+      {
+        text: 'Ve kterém slově je chyba?',
+        answers: ['hrad', 'mráz', 'zup', 'chléb'],
+        correctIndex: 2,
+        timeLimitSec: 30,
+      },
+    ],
+  },
+  {
     id: 'test',
     pin: '0000',
     title: 'Rychlý test (2 otázky)',

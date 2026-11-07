@@ -4,5 +4,5 @@
     "lib": ["ES2022"],
     "types": ["node"]
   },
-  "include": ["vite.config.ts", "vitest.config.ts", "playwright.config.ts", "e2e/**/*.ts"]
+  "include": ["vite.config.ts", "vitest.config.ts", "playwright.config.ts", "e2e/**/*.ts", "src/shared/games.test.ts"]
 }

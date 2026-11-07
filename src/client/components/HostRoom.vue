@@ -129,6 +129,7 @@ const maxCount = computed(() => Math.max(1, ...(snap.value?.answerCounts ?? [0])
       </div>
       <Countdown :ends-at="snap.questionEndsAt" :total-sec="question.timeLimitSec" :server-now="sock.serverNow" />
       <h1 style="font-size: clamp(1.6rem, 4vw, 3rem); text-align: center" data-testid="question-text">{{ question.text }}</h1>
+      <img v-if="question.image" :src="question.image" class="qimage host" alt="" data-testid="question-image" />
       <div class="answers">
         <AnswerButton v-for="(text, i) in question.answers" :key="i" :index="i" :text="text" readonly />
       </div>
@@ -138,6 +139,7 @@ const maxCount = computed(() => Math.max(1, ...(snap.value?.answerCounts ?? [0])
     <!-- Reveal -->
     <section v-else-if="snap.phase === 'reveal' && question" class="stack" style="flex: 1; max-width: 1100px; width: 100%; margin: 0 auto">
       <h1 style="text-align: center">{{ question.text }}</h1>
+      <img v-if="question.image" :src="question.image" class="qimage host" alt="" style="max-height: 24vh" />
       <div class="bars">
         <div v-for="(count, i) in snap.answerCounts ?? []" :key="i" class="barcol">
           <div class="count">{{ count }}</div>

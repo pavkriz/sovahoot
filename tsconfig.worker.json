@@ -4,5 +4,6 @@
     "lib": ["ES2022"],
     "types": ["./worker-configuration.d.ts", "@cloudflare/vitest-plugin/types"]
   },
-  "include": ["src/worker/**/*.ts", "src/shared/**/*.ts", "test/**/*.ts", "worker-configuration.d.ts"]
+  "include": ["src/worker/**/*.ts", "src/shared/**/*.ts", "test/**/*.ts", "worker-configuration.d.ts"],
+  "exclude": ["src/shared/games.test.ts"]
 }

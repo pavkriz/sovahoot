@@ -77,6 +77,7 @@ const rankText = computed(() => (me.value && me.value.rank > 0 ? `${me.value.ran
         <Countdown :ends-at="snap.questionEndsAt" :total-sec="question.timeLimitSec" :server-now="sock.serverNow" />
         <p class="muted" style="color: rgba(255, 255, 255, 0.8)">Otázka {{ question.index + 1 }} z {{ question.total }}</p>
         <h2 data-testid="question-text">{{ question.text }}</h2>
+        <img v-if="question.image" :src="question.image" class="qimage" alt="" data-testid="question-image" />
         <template v-if="me?.answerIndex === null">
           <div class="answers" :class="{ many: question.answers.length > 2 }">
             <AnswerButton
@@ -105,6 +106,7 @@ const rankText = computed(() => (me.value && me.value.rank > 0 ? `${me.value.ran
         </h1>
         <p class="big" data-testid="gain">+{{ me?.lastGain ?? 0 }}</p>
         <p>Celkem máš <strong data-testid="my-score">{{ me?.score ?? 0 }}</strong> bodů</p>
+        <img v-if="question.image" :src="question.image" class="qimage" alt="" />
         <div class="answers" :class="{ many: question.answers.length > 2 }">
           <AnswerButton
             v-for="(text, i) in question.answers"

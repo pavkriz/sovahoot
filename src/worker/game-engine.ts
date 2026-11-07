@@ -251,6 +251,7 @@ export class GameEngine {
           text: q.text,
           answers: q.answers,
           timeLimitSec: q.timeLimitSec,
+          ...(q.image ? { image: q.image } : {}),
         }
       : null
 

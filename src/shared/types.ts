@@ -14,6 +14,8 @@ export interface Question {
   answers: string[]
   correctIndex: number
   timeLimitSec: number
+  /** Optional picture shown under the question text: URL of a static asset under `public/img/`. */
+  image?: string
 }
 
 export interface Game {
@@ -38,6 +40,7 @@ export interface PublicQuestion {
   text: string
   answers: string[]
   timeLimitSec: number
+  image?: string
 }
 
 export interface PlayerPublic {
