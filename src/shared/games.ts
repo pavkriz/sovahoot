@@ -115,6 +115,42 @@ export const GAMES: Game[] = [
         correctIndex: 2,
         timeLimitSec: 30,
       },
+      {
+        text: 'Petřík dostal pod stromeček 19 dárků. Jeho mladší sestřička Anička dostala o 3 dárky více než Petřík. Kolik dárků dostala pod stromeček Anička?',
+        answers: ['16', '19', '22', '3'],
+        correctIndex: 2,
+        timeLimitSec: 45,
+      },
+      {
+        text: '5 + 42 : 6 =',
+        answers: ['12', '7', '13', '47'],
+        correctIndex: 0,
+        timeLimitSec: 30,
+      },
+      {
+        text: '3 + 15 − 10 + 3 =',
+        answers: ['5', '10', '11', '21'],
+        correctIndex: 2,
+        timeLimitSec: 30,
+      },
+      {
+        text: 'Kdo napsal a ilustroval knížku Dášeňka čili život štěněte?',
+        answers: ['Josef Lada', 'Karel Čapek', 'Ondřej Sekora', 'Zdeněk Miler'],
+        correctIndex: 1,
+        timeLimitSec: 30,
+      },
+      {
+        text: 'Olej se ve vodě rozpustí.',
+        answers: ['Pravda', 'Lež'],
+        correctIndex: 1,
+        timeLimitSec: 20,
+      },
+      {
+        text: 'Patří borůvka, třešeň a rybíz do stejného druhu plodů?',
+        answers: ['Ano', 'Ne'],
+        correctIndex: 1,
+        timeLimitSec: 30,
+      },
     ],
   },
   {
