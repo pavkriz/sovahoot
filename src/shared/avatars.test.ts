@@ -20,9 +20,9 @@ describe('avatars', () => {
     expect(new Set(HATS).size).toBe(6)
   })
 
-  it('offers 21 distinct characters including the polar bear ZWJ sequence', () => {
-    expect(CHARACTERS).toHaveLength(21)
-    expect(new Set(CHARACTERS).size).toBe(21)
+  it('offers 24 distinct characters including the polar bear ZWJ sequence', () => {
+    expect(CHARACTERS).toHaveLength(24)
+    expect(new Set(CHARACTERS).size).toBe(24)
     expect(CHARACTERS).toContain('🐻‍❄️')
     expect(normalizeAvatar({ character: '🐻‍❄️', hat: null, color: COLORS[0] }).character).toBe('🐻‍❄️')
   })

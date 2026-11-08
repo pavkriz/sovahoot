@@ -8,11 +8,13 @@ export interface Avatar {
 }
 
 // sova, liška, žába, panda, kočka, pes, lev, koala, prase, opice, jednorožec,
-// medvěd, lední medvěd, křeček, králík, myš, tygr, vlk, kuřátko, kráva, kůň
+// medvěd, lední medvěd, křeček, králík, myš, tygr, vlk, kuřátko, kráva, kůň,
+// halloweenská dýně, lebka, zeměkoule
 // (new ones go at the end: the join form and e2e tests address characters by index)
 export const CHARACTERS = [
   '🦉', '🦊', '🐸', '🐼', '🐱', '🐶', '🦁', '🐨', '🐷', '🐵', '🦄',
   '🐻', '🐻‍❄️', '🐹', '🐰', '🐭', '🐯', '🐺', '🐥', '🐮', '🐴',
+  '🎃', '💀', '🌍',
 ] as const
 // cylindr, koruna, kšiltovka, akademická čepice, mašle, dámský klobouk
 // (new ones go at the end: e2e tests address hats by index)
@@ -119,6 +121,9 @@ export const HAT_FIT: Record<string, CharacterFit> = {
   '🐥': { base: { y: 0.0, s: 0.8 } }, // kuřátko
   '🐮': { base: { y: 0.08, s: 0.85 } }, // kráva (růžky)
   '🐴': { base: { x: 0.1, y: 0.05, r: 16, s: 0.8 } }, // kůň (hlava z profilu jako jednorožec)
+  '🎃': { base: { y: 0.1 } }, // halloweenská dýně (stopka nahoře)
+  '💀': { base: { y: 0.07 } }, // lebka
+  '🌍': { base: { y: 0.05 } }, // zeměkoule
 }
 
 function add(a: HatPlacement, d: Delta | undefined): HatPlacement {
