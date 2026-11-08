@@ -84,22 +84,22 @@ export const DEFAULT_PLACEMENT: HatPlacement = { x: 0, y: 0.1, r: -6, s: 1 }
 export const HAT_DEFAULTS: Record<string, Delta> = {
   '🎩': { r: -2 }, // cylindr
   '👑': { r: 6 }, // koruna
-  '🧢': { x: 0.02, y: 0.03, r: 6 }, // modrá kšiltovka
+  '🧢': { x: 0.02, y: 0.06, r: 6 }, // modrá kšiltovka
   '🎓': { y: 0.04, r: -4 }, // akademická čepice; střapec visí pod deskou, deska musí sedět níž
-  '🎀': { x: 0.1, y: 0.05, r: 21, s: 0.8 }, // mašle
+  '🎀': { x: 0.0, y: 0.15, r: 21, s: 0.6 }, // mašle
 }
 
 /** Per-character tweaks: where the head's crown is in each glyph. */
 export const HAT_FIT: Record<string, CharacterFit> = {
-  '🦉': { base: { y: 0.02, s: 0.9 } }, // sova
-  '🦊': { base: { y: 0.03, s: 0.85 } }, // liška
+  '🦉': { base: { y: 0.01, s: 0.9 } }, // sova
+  '🦊': { base: { y: 0.10, s: 0.85 } }, // liška
   '🐸': { base: { y: 0.03 } }, // žába
-  '🐼': { base: {} }, // panda
-  '🐱': { base: { y: 0.03, s: 0.85 } }, // kočka
+  '🐼': { base: { y: 0.03 } }, // panda
+  '🐱': { base: { y: 0.10, s: 0.85 } }, // kočka
   '🐶': { base: { y: 0.02 } }, // pes
   '🦁': { base: {} }, // lev
   '🐨': { base: { y: 0.03 } }, // koala
-  '🐷': { base: { y: -0.01 } }, // prase
+  '🐷': { base: { y: 0.05 } }, // prase
   '🐵': { base: { y: 0.03 } }, // opice
   '🦄': { base: { x: 0.1, y: 0.05, r: 16, s: 0.8 } }, // jednorožec
 }
