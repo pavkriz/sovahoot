@@ -71,9 +71,12 @@ Jednorázově (v Cloudflare účtu):
 ```bash
 npx wrangler login
 npx wrangler d1 create sovahoot          # vypsané database_id vlož do wrangler.jsonc (není tajné)
-npx wrangler secret put HOST_PASSWORD    # heslo moderátora
 npm run deploy                           # první ruční deploy: migrace + wrangler deploy
+npx wrangler secret put HOST_PASSWORD    # heslo moderátora (Worker už musí existovat)
 ```
+
+Aplikace běží na vlastní doméně `sovahoot.gohub.cz` (`routes` ve `wrangler.jsonc`). Zóna `gohub.cz` je vedená
+v tomtéž Cloudflare účtu; DNS záznam i certifikát založí wrangler při prvním deployi sám.
 
 ### Automatický deploy z GitHubu
 
@@ -87,12 +90,14 @@ Potřebné GitHub secrets (Settings → Secrets and variables → Actions):
 
 | Secret | Hodnota |
 | --- | --- |
-| `CLOUDFLARE_API_TOKEN` | API token (šablona „Edit Cloudflare Workers“ + oprávnění D1 Edit) |
+| `CLOUDFLARE_API_TOKEN` | API token: šablona „Edit Cloudflare Workers“ + Account → D1 → Edit + Zone → DNS → Edit (jen zóna gohub.cz, kvůli vlastní doméně) |
 | `CLOUDFLARE_ACCOUNT_ID` | Account ID z přehledu Workers v dashboardu |
 
 Doporučeno zapnout branch protection na `main` s povinným checkem `test`.
 
-`HOST_PASSWORD` zůstává jen jako Wrangler secret; v repu ani v GitHub secrets není.
+`HOST_PASSWORD` zůstává jen jako Worker secret v Cloudflare (šifrovaně u Workeru `sovahoot`); v repu ani v GitHub
+secrets není a deploy ho nepřepisuje. Změna hesla = znovu `npx wrangler secret put HOST_PASSWORD`; staré tokeny
+moderátora tím přestanou platit.
 
 ## Struktura
 

@@ -4,6 +4,8 @@
   "main": "src/worker/index.ts",
   "compatibility_date": "2026-11-01",
   "compatibility_flags": ["nodejs_compat"],
+  // Custom domain; the gohub.cz zone lives in the same Cloudflare account. Wrangler creates the DNS record and certificate.
+  "routes": [{ "pattern": "sovahoot.gohub.cz", "custom_domain": true }],
   "assets": {
     // Vue SPA built by Vite; every unknown path falls back to index.html.
     "not_found_handling": "single-page-application",
@@ -18,8 +20,8 @@
     {
       "binding": "DB",
       "database_name": "sovahoot",
-      // Replace with the id printed by `wrangler d1 create sovahoot` (not a secret).
-      "database_id": "00000000-0000-0000-0000-000000000000",
+      // Printed by `wrangler d1 create sovahoot` (not a secret).
+      "database_id": "f0629ddc-3aaf-440c-80e3-183374808584",
       "migrations_dir": "migrations"
     }
   ],
