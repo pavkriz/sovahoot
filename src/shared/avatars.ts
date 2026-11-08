@@ -122,8 +122,8 @@ export const HAT_FIT: Record<string, CharacterFit> = {
   '🐮': { base: { y: 0.08, s: 0.85 } }, // kráva (růžky)
   '🐴': { base: { x: 0.1, y: 0.05, r: 16, s: 0.8 } }, // kůň (hlava z profilu jako jednorožec)
   '🎃': { base: { y: 0.1 } }, // halloweenská dýně (stopka nahoře)
-  '💀': { base: { y: 0.07 } }, // lebka
-  '🌍': { base: { y: 0.05 } }, // zeměkoule
+  '💀': { base: { y: 0.02 } }, // lebka
+  '🌍': { base: { y: 0.02 } }, // zeměkoule
 }
 
 function add(a: HatPlacement, d: Delta | undefined): HatPlacement {
