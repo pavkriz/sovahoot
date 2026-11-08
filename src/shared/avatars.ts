@@ -14,9 +14,9 @@ export const CHARACTERS = [
   '🦉', '🦊', '🐸', '🐼', '🐱', '🐶', '🦁', '🐨', '🐷', '🐵', '🦄',
   '🐻', '🐻‍❄️', '🐹', '🐰', '🐭', '🐯', '🐺', '🐥', '🐮', '🐴',
 ] as const
-// cylindr, koruna, kšiltovka, akademická čepice, mašle, dámský klobouk, sluchátka
+// cylindr, koruna, kšiltovka, akademická čepice, mašle, dámský klobouk
 // (new ones go at the end: e2e tests address hats by index)
-export const HATS = ['🎩', '👑', '🧢', '🎓', '🎀', '👒', '🎧'] as const
+export const HATS = ['🎩', '👑', '🧢', '🎓', '🎀', '👒'] as const
 export const COLORS = ['#ffd166', '#06d6a0', '#118ab2', '#ef476f', '#8338ec', '#3a86ff', '#fb5607'] as const
 
 export const DEFAULT_AVATAR: Avatar = { character: CHARACTERS[0], hat: null, color: COLORS[0] }
@@ -93,8 +93,7 @@ export const HAT_DEFAULTS: Record<string, Delta> = {
   '🧢': { x: 0.02, y: 0.06, r: 6 }, // modrá kšiltovka
   '🎓': { y: 0.04, r: -4 }, // akademická čepice; střapec visí pod deskou, deska musí sedět níž
   '🎀': { x: 0.0, y: 0.15, r: 21, s: 0.6 }, // mašle
-  '👒': { y: 0.02, r: -4, s: 1.05 }, // dámský klobouk (široká krempa)
-  '🎧': { y: 0.14, r: 0, s: 1.05 }, // sluchátka (oblouk přes temeno, nejníž)
+  '👒': { y: 0.12, r: -20, s: 1.2 }, // dámský klobouk (široká krempa)
 }
 
 /** Per-character tweaks: where the head's crown is in each glyph. */
