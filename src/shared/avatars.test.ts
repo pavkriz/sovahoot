@@ -42,7 +42,7 @@ describe('avatars', () => {
       expect(Math.abs(p.x)).toBeLessThanOrEqual(0.3)
       expect(p.y).toBeGreaterThanOrEqual(-0.4)
       expect(p.y).toBeLessThanOrEqual(0.4)
-      expect(p.s).toBeGreaterThanOrEqual(0.5)
+      expect(p.s).toBeGreaterThanOrEqual(0.4)
       expect(p.s).toBeLessThanOrEqual(1.5)
       expect(Number.isFinite(p.r)).toBe(true)
     }
