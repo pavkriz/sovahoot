@@ -45,7 +45,8 @@ npm run dev                      # http://localhost:5173 – aplikuje lokální 
 ```
 
 Pak otevři `/host`, přihlas se heslem, vyber hru a v dalších oknech (nebo na mobilech v síti, `npm run dev -- --host`)
-otevři `/`, zadej PIN a přezdívku. Testovací hra má PIN `0000` a jen dvě otázky.
+otevři `/`, zadej PIN a přezdívku. Testy (integrační i e2e) používají první hru z `games.ts`, žádná testovací hra
+v datech není.
 
 Užitečné:
 

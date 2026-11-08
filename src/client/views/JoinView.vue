@@ -26,8 +26,8 @@ async function submit() {
   localError.value = ''
   const p = pin.value.trim()
   const n = nickname.value.trim()
-  if (!/^\d{4}$/.test(p)) {
-    localError.value = 'PIN má 4 číslice.'
+  if (!/^\d{4,6}$/.test(p)) {
+    localError.value = 'PIN má 4 až 6 číslic.'
     return
   }
   if (n.length === 0 || n.length > 20) {
@@ -53,7 +53,7 @@ async function submit() {
         data-testid="pin-input"
         inputmode="numeric"
         pattern="[0-9]*"
-        maxlength="4"
+        maxlength="6"
         placeholder="PIN hry"
         autocomplete="off"
         aria-label="PIN hry"

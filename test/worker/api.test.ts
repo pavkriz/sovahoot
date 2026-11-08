@@ -1,8 +1,8 @@
 import { env } from 'cloudflare:test'
 import { beforeEach, describe, expect, it } from 'vitest'
-import { fetchWorker, hostToken, resetRoom, WsClient } from './helpers'
+import { fetchWorker, GAME, hostToken, PIN, resetRoom, WsClient } from './helpers'
 
-beforeEach(() => resetRoom('0000'))
+beforeEach(() => resetRoom(PIN))
 
 describe('HTTP API', () => {
   it('lists games without leaking correct answers', async () => {
@@ -11,8 +11,8 @@ describe('HTTP API', () => {
     const text = await res.text()
     expect(text).not.toContain('correctIndex')
     const games = JSON.parse(text) as Array<{ id: string; pin: string; title: string; questionCount: number }>
-    expect(games.length).toBeGreaterThanOrEqual(2)
-    expect(games.find((g) => g.pin === '0000')).toMatchObject({ id: 'test', questionCount: 2 })
+    expect(games.length).toBeGreaterThanOrEqual(1)
+    expect(games.find((g) => g.pin === PIN)).toMatchObject({ id: GAME.id, questionCount: GAME.questions.length })
   })
 
   it('logs the host in with the right password only', async () => {
@@ -30,10 +30,10 @@ describe('HTTP API', () => {
 
   it('rejects websocket upgrades for unknown PINs, missing params and unauthenticated hosts', async () => {
     await WsClient.connectExpecting('/ws/9999?role=player&playerId=p1&nickname=A', 404)
-    await WsClient.connectExpecting('/ws/0000?role=player&nickname=A', 400)
-    await WsClient.connectExpecting('/ws/0000?role=host', 401)
-    await WsClient.connectExpecting('/ws/0000?role=host&token=123.deadbeef', 401)
-    const plain = await fetchWorker('/ws/0000?role=player&playerId=p1&nickname=A')
+    await WsClient.connectExpecting(`/ws/${PIN}?role=player&nickname=A`, 400)
+    await WsClient.connectExpecting(`/ws/${PIN}?role=host`, 401)
+    await WsClient.connectExpecting(`/ws/${PIN}?role=host&token=123.deadbeef`, 401)
+    const plain = await fetchWorker(`/ws/${PIN}?role=player&playerId=p1&nickname=A`)
     expect(plain.status).toBe(426)
   })
 

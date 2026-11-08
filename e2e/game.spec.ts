@@ -1,7 +1,12 @@
 import { expect, test, type Browser, type Page } from '@playwright/test'
+import { GAMES } from '../src/shared/games'
 
-// Uses the hardcoded "Rychlý test" game: PIN 0000, two questions, correct answers 0 and 1.
-const PIN = '0000'
+// Data-driven: plays the first hardcoded game, whatever its questions are.
+const GAME = GAMES[0]!
+const PIN = GAME.pin
+const LAST = GAME.questions.length - 1
+const correct = (i: number) => GAME.questions[i]!.correctIndex
+const wrong = (i: number) => (correct(i) + 1) % GAME.questions[i]!.answers.length
 const PASSWORD = process.env.HOST_PASSWORD ?? 'sovahoot'
 
 async function openHost(browser: Browser): Promise<Page> {
@@ -9,7 +14,7 @@ async function openHost(browser: Browser): Promise<Page> {
   await page.goto('/host')
   await page.getByTestId('host-password').fill(PASSWORD)
   await page.getByTestId('host-login').click()
-  await page.getByTestId('game-test').click()
+  await page.getByTestId(`game-${GAME.id}`).click()
   await expect(page.locator('main')).toHaveAttribute('data-phase', /lobby|question|reveal|leaderboard|podium/)
   // Local Durable Object storage survives between runs: always start from an empty lobby.
   const phase = await page.locator('main').getAttribute('data-phase')
@@ -47,42 +52,51 @@ test('host and two players play a whole game, one player reloads mid-question', 
   await expect(aliceChip).toContainText('🦊')
   await expect(aliceChip).toContainText('👑')
 
-  // Question 1: Alice right, Bob wrong → closes as soon as both answered.
   await host.getByTestId('start-button').click()
-  await expect(alice.getByTestId('question-text')).toBeVisible()
   await expect(host.getByTestId('countdown')).toBeVisible()
-  await alice.getByTestId('answer-0').click()
-  await expect(alice.getByTestId('answered')).toBeVisible()
-  await expect(host.getByTestId('answered-count')).toHaveText('Odpovědělo 1 z 2')
-  await bob.getByTestId('answer-1').click()
 
-  await expect(alice.getByTestId('result')).toContainText('Správně')
-  await expect(bob.getByTestId('result')).toContainText('špatně')
-  await expect(host.locator('main')).toHaveAttribute('data-phase', 'reveal')
-  const aliceGain = Number((await alice.getByTestId('gain').textContent())?.replace('+', ''))
-  expect(aliceGain).toBeGreaterThan(0)
+  for (let i = 0; i <= LAST; i++) {
+    const q = GAME.questions[i]!
+    await expect(alice.getByTestId('question-text')).toHaveText(q.text)
 
-  await host.getByTestId('next-button').click() // → leaderboard
-  await expect(alice.getByTestId('my-rank')).toHaveText('1. místo')
-  await expect(host.getByTestId('leaderboard')).toContainText('Alice')
-  await host.getByTestId('next-button').click() // → question 2
-  await expect(alice.getByTestId('question-text')).toContainText('pavouk')
+    if (i === 1) {
+      // Alice's phone "dies" mid-question: a reload must restore her seat and the running question.
+      await alice.reload()
+      await expect(alice.getByTestId('question-text')).toHaveText(q.text)
+      await expect(alice.getByTestId('connection-status')).toHaveText('Připojeno')
+      await expect(host.getByTestId('answered-count')).toHaveText('Odpovědělo 0 z 2')
+    }
 
-  // Alice's phone "dies" mid-question: a reload must restore her seat and the running question.
-  await alice.reload()
-  await expect(alice.getByTestId('question-text')).toContainText('pavouk')
-  await expect(alice.getByTestId('connection-status')).toHaveText('Připojeno')
-  await expect(host.getByTestId('answered-count')).toHaveText('Odpovědělo 0 z 2')
+    await alice.getByTestId(`answer-${correct(i)}`).click()
+    if (i === 0) {
+      await expect(alice.getByTestId('answered')).toBeVisible()
+      await expect(host.getByTestId('answered-count')).toHaveText('Odpovědělo 1 z 2')
+    }
+    await bob.getByTestId(`answer-${wrong(i)}`).click()
+    await expect(host.locator('main')).toHaveAttribute('data-phase', 'reveal')
 
-  await alice.getByTestId('answer-1').click()
-  await bob.getByTestId('answer-0').click()
-  await expect(host.locator('main')).toHaveAttribute('data-phase', 'reveal')
-  // Last question: skip the leaderboard and announce the results directly.
-  await expect(host.getByTestId('skip-button')).toContainText('Vyhlásit výsledky')
-  await host.getByTestId('skip-button').click() // → podium
+    if (i === 0) {
+      await expect(alice.getByTestId('result')).toContainText('Správně')
+      await expect(bob.getByTestId('result')).toContainText('špatně')
+      const aliceGain = Number((await alice.getByTestId('gain').textContent())?.replace('+', ''))
+      expect(aliceGain).toBeGreaterThan(0)
+      await host.getByTestId('next-button').click() // → leaderboard
+      await expect(alice.getByTestId('my-rank')).toHaveText('1. místo')
+      await expect(host.getByTestId('leaderboard')).toContainText('Alice')
+      await host.getByTestId('next-button').click() // → next question
+    } else if (i < LAST) {
+      await expect(host.getByTestId('skip-button')).toContainText('Další otázka')
+      await host.getByTestId('skip-button').click() // → next question, no leaderboard
+    } else {
+      await expect(host.getByTestId('skip-button')).toContainText('Vyhlásit výsledky')
+      await host.getByTestId('skip-button').click() // → podium
+    }
+  }
 
   await expect(host.getByTestId('podium')).toContainText('Alice')
   await expect(host.getByTestId('podium')).toContainText('🦊')
+  await expect(host.getByTestId('podium-slot')).toHaveCount(3) // three steps even with two players
+  await expect(host.locator('[data-testid=podium-slot][data-empty]')).toHaveCount(1)
   await expect(alice.getByTestId('final-rank')).toContainText('1. místo')
   await expect(bob.getByTestId('final-rank')).toContainText('2. místo')
 
@@ -90,7 +104,7 @@ test('host and two players play a whole game, one player reloads mid-question', 
   const history = await browser.newPage()
   await history.goto('/history')
   const latest = history.getByTestId('history-session').first()
-  await expect(latest).toContainText('Rychlý test')
+  await expect(latest).toContainText(GAME.title)
   await expect(latest).toContainText('Alice')
   await expect(latest).toContainText('Bob')
 

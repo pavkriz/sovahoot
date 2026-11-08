@@ -5,10 +5,10 @@ import { GAMES } from './games'
 
 // Guards the hand-written game data: a typo here would only show up live in front of the class.
 describe('hardcoded games', () => {
-  it('have unique ids and 4-digit pins', () => {
+  it('have unique ids and 4–6 digit pins', () => {
     expect(new Set(GAMES.map((g) => g.id)).size).toBe(GAMES.length)
     expect(new Set(GAMES.map((g) => g.pin)).size).toBe(GAMES.length)
-    for (const g of GAMES) expect(g.pin).toMatch(/^\d{4}$/)
+    for (const g of GAMES) expect(g.pin).toMatch(/^\d{4,6}$/)
   })
 
   it('have well-formed questions', () => {

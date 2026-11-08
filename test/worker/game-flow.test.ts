@@ -2,9 +2,7 @@ import { env, evictDurableObject, runDurableObjectAlarm } from 'cloudflare:test'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { DEFAULT_AVATAR, encodeAvatar } from '../../src/shared/avatars'
 import type { HostSnapshot, PlayerSnapshot, ScoreRow } from '../../src/shared/types'
-import { fetchWorker, hostPath, hostToken, playerPath, resetRoom, WsClient } from './helpers'
-
-const PIN = '0000' // "Rychlý test": 2 questions, correct answers 0 and 1
+import { correct, fetchWorker, GAME, hostPath, hostToken, LAST, PIN, playerPath, resetRoom, wrong, WsClient } from './helpers'
 
 function roomStub() {
   return env.GAME_ROOM.get(env.GAME_ROOM.idFromName(PIN))
@@ -32,20 +30,20 @@ describe('game flow over websockets', () => {
 
     host.send({ type: 'start', phase: 'lobby' })
     const q1 = await alice.until((s) => s.phase === 'question')
-    expect(q1.question).toMatchObject({ index: 0, total: 2 })
+    expect(q1.question).toMatchObject({ index: 0, total: GAME.questions.length, text: GAME.questions[0]!.text })
     expect(q1.correctIndex).toBeNull()
     expect(q1.questionEndsAt).toBeGreaterThan(q1.serverNow)
-    expect(JSON.stringify(q1)).not.toContain('"correctIndex":0')
+    expect(JSON.stringify(q1)).not.toContain('correctIndex":' + correct(0))
 
-    alice.send({ type: 'answer', questionIndex: 0, answerIndex: 0 })
+    alice.send({ type: 'answer', questionIndex: 0, answerIndex: correct(0) })
     const h1 = (await host.until((s) => s.role === 'host' && s.answeredCount === 1)) as HostSnapshot
     expect(h1.phase).toBe('question')
 
     // Bob never answers; the server-side alarm closes the question.
     expect(await runDurableObjectAlarm(roomStub())).toBe(true)
     const reveal = (await bob.until((s) => s.phase === 'reveal')) as PlayerSnapshot
-    expect(reveal.correctIndex).toBe(0)
-    expect(reveal.answerCounts).toEqual([1, 0])
+    expect(reveal.correctIndex).toBe(correct(0))
+    expect(reveal.answerCounts?.[correct(0)]).toBe(1)
     expect(reveal.me).toMatchObject({ correct: false, lastGain: 0, answerIndex: null })
     const aliceReveal = (await alice.until((s) => s.phase === 'reveal')) as PlayerSnapshot
     expect(aliceReveal.me?.correct).toBe(true)
@@ -54,30 +52,30 @@ describe('game flow over websockets', () => {
     host.send({ type: 'next', phase: 'reveal', questionIndex: 0 })
     const lb = await host.until((s) => s.phase === 'leaderboard')
     expect(lb.leaderboard.map((e) => e.nickname)).toEqual(['Alice', 'Bob'])
-
     host.send({ type: 'next', phase: 'leaderboard', questionIndex: 0 })
-    await bob.until((s) => s.phase === 'question' && s.question?.index === 1)
 
-    // Everyone answers → the question closes without waiting for the alarm.
-    alice.send({ type: 'answer', questionIndex: 1, answerIndex: 1 })
-    bob.send({ type: 'answer', questionIndex: 1, answerIndex: 1 })
-    await host.until((s) => s.phase === 'reveal' && s.question?.index === 1)
-
-    host.send({ type: 'next', phase: 'reveal', questionIndex: 1 })
-    await host.until((s) => s.phase === 'leaderboard' && s.question?.index === 1)
-    host.send({ type: 'next', phase: 'leaderboard', questionIndex: 1 })
+    // Remaining questions: everyone answers → closes without the alarm; host walks reveal → leaderboard → next.
+    for (let i = 1; i <= LAST; i++) {
+      await bob.until((s) => s.phase === 'question' && s.question?.index === i)
+      alice.send({ type: 'answer', questionIndex: i, answerIndex: correct(i) })
+      bob.send({ type: 'answer', questionIndex: i, answerIndex: wrong(i) })
+      await host.until((s) => s.phase === 'reveal' && s.question?.index === i)
+      host.send({ type: 'next', phase: 'reveal', questionIndex: i })
+      await host.until((s) => s.phase === 'leaderboard' && s.question?.index === i)
+      host.send({ type: 'next', phase: 'leaderboard', questionIndex: i })
+    }
     const podium = await alice.until((s) => s.phase === 'podium')
     expect(podium.leaderboard[0]?.nickname).toBe('Alice')
     expect(podium.hasNextQuestion).toBe(false)
 
     const rows = (await env.DB.prepare('SELECT * FROM scores ORDER BY rank').all<ScoreRow>()).results
     expect(rows).toHaveLength(2)
-    expect(rows[0]).toMatchObject({ game_id: 'test', nickname: 'Alice', rank: 1 })
-    expect(rows[1]).toMatchObject({ game_id: 'test', nickname: 'Bob', rank: 2 })
+    expect(rows[0]).toMatchObject({ game_id: GAME.id, nickname: 'Alice', rank: 1 })
+    expect(rows[1]).toMatchObject({ game_id: GAME.id, nickname: 'Bob', rank: 2 })
     expect(rows[0]?.session_id).toBe(rows[1]?.session_id)
     expect(rows[0]!.score).toBeGreaterThan(rows[1]!.score)
 
-    const api = (await (await fetchWorker('/api/scores?game=test')).json()) as ScoreRow[]
+    const api = (await (await fetchWorker(`/api/scores?game=${GAME.id}`)).json()) as ScoreRow[]
     expect(api).toHaveLength(2)
 
     // Reset returns to an empty lobby for the next session.
@@ -91,7 +89,7 @@ describe('game flow over websockets', () => {
     const { host, alice, bob } = await setup()
     host.send({ type: 'start', phase: 'lobby' })
     await alice.until((s) => s.phase === 'question')
-    alice.send({ type: 'answer', questionIndex: 0, answerIndex: 0 })
+    alice.send({ type: 'answer', questionIndex: 0, answerIndex: correct(0) })
     await host.until((s) => s.role === 'host' && s.answeredCount === 1)
 
     alice.close()
@@ -101,7 +99,7 @@ describe('game flow over websockets', () => {
     // Reconnect mid-question with a different nickname: identity wins, nickname is kept.
     const alice2 = await WsClient.connect(playerPath(PIN, 'p-alice', 'Impostor'))
     const back = (await alice2.until((s) => s.phase === 'question')) as PlayerSnapshot
-    expect(back.me).toMatchObject({ nickname: 'Alice', answerIndex: 0 })
+    expect(back.me).toMatchObject({ nickname: 'Alice', answerIndex: correct(0) })
     expect(back.questionEndsAt).toBeGreaterThan(back.serverNow)
     await host.until((s) => s.players.every((p) => p.connected))
 
@@ -130,19 +128,14 @@ describe('game flow over websockets', () => {
   it('lets the host skip the leaderboard and go straight to the next question or the podium', async () => {
     const { host, alice, bob } = await setup()
     host.send({ type: 'start', phase: 'lobby' })
-    await alice.until((s) => s.phase === 'question')
-    alice.send({ type: 'answer', questionIndex: 0, answerIndex: 0 })
-    bob.send({ type: 'answer', questionIndex: 0, answerIndex: 1 })
-    await host.until((s) => s.phase === 'reveal')
-
-    host.send({ type: 'next', phase: 'reveal', questionIndex: 0, skipLeaderboard: true })
-    const q2 = await bob.until((s) => s.phase === 'question' && s.question?.index === 1)
-    expect(q2.questionEndsAt).toBeGreaterThan(q2.serverNow)
-
-    alice.send({ type: 'answer', questionIndex: 1, answerIndex: 1 })
-    bob.send({ type: 'answer', questionIndex: 1, answerIndex: 1 })
-    await host.until((s) => s.phase === 'reveal' && s.question?.index === 1)
-    host.send({ type: 'next', phase: 'reveal', questionIndex: 1, skipLeaderboard: true })
+    for (let i = 0; i <= LAST; i++) {
+      const q = await bob.until((s) => s.phase === 'question' && s.question?.index === i)
+      expect(q.questionEndsAt).toBeGreaterThan(q.serverNow)
+      alice.send({ type: 'answer', questionIndex: i, answerIndex: correct(i) })
+      bob.send({ type: 'answer', questionIndex: i, answerIndex: wrong(i) })
+      await host.until((s) => s.phase === 'reveal' && s.question?.index === i)
+      host.send({ type: 'next', phase: 'reveal', questionIndex: i, skipLeaderboard: true })
+    }
     const podium = await host.until((s) => s.phase === 'podium')
     expect(podium.leaderboard[0]?.avatar).toBeDefined()
     const rows = (await env.DB.prepare('SELECT nickname FROM scores ORDER BY rank').all<{ nickname: string }>()).results
@@ -181,7 +174,7 @@ describe('game flow over websockets', () => {
     const { host, alice, bob } = await setup()
     host.send({ type: 'start', phase: 'lobby' })
     await alice.until((s) => s.phase === 'question')
-    alice.send({ type: 'answer', questionIndex: 0, answerIndex: 0 })
+    alice.send({ type: 'answer', questionIndex: 0, answerIndex: correct(0) })
     await host.until((s) => s.role === 'host' && s.answeredCount === 1)
 
     // A fresh HTTP request after the in-memory instance is gone must see the same state.
@@ -191,7 +184,7 @@ describe('game flow over websockets', () => {
     const snap = (await res.json()) as PlayerSnapshot
     expect(snap.phase).toBe('question')
     expect(snap.players).toHaveLength(2)
-    expect(snap.me).toMatchObject({ nickname: 'Alice', answerIndex: 0 })
+    expect(snap.me).toMatchObject({ nickname: 'Alice', answerIndex: correct(0) })
     ;[host, alice, bob].forEach((c) => c.close())
   })
 })
@@ -219,7 +212,7 @@ describe('polling fallback over plain HTTP', () => {
     const ans = await fetchWorker(`/api/room/${PIN}/answer`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ playerId: 'p-poll', questionIndex: 0, answerIndex: 0 }),
+      body: JSON.stringify({ playerId: 'p-poll', questionIndex: 0, answerIndex: correct(0) }),
     })
     expect(ans.status).toBe(200)
     // Polly is the only connected player, so the question closes right away.

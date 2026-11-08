@@ -1,11 +1,19 @@
 import { env, evictDurableObject, runInDurableObject } from 'cloudflare:test'
 import { exports } from 'cloudflare:workers'
 import { expect } from 'vitest'
+import { GAMES } from '../../src/shared/games'
 import type { ClientMessage, ServerMessage, Snapshot } from '../../src/shared/types'
 
 const worker = exports.default
 
 export const BASE = 'http://sovahoot.test'
+
+/** Tests are data-driven: they play the first hardcoded game, whatever its content. */
+export const GAME = GAMES[0]!
+export const PIN = GAME.pin
+export const LAST = GAME.questions.length - 1
+export const correct = (i: number): number => GAME.questions[i]!.correctIndex
+export const wrong = (i: number): number => (correct(i) + 1) % GAME.questions[i]!.answers.length
 
 /**
  * The Vitest plugin keeps Durable Object and D1 storage across tests, so every test
