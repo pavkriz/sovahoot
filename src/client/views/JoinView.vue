@@ -18,6 +18,7 @@ const errorTexts: Record<string, string> = {
   nickname_taken: 'Tuhle přezdívku už někdo ve hře používá. Zvol si jinou.',
   invalid_nickname: 'Přezdívka musí mít 1 až 20 znaků.',
   not_allowed: 'Hru s tímto PINem se nepodařilo najít.',
+  game_over: 'Tahle hra už skončila. Počkej, až moderátor spustí novou, a zkus to znovu.',
   unknown_pin: 'Hra s tímto PINem neexistuje.',
 }
 const error = computed(() => localError.value || (typeof route.query.error === 'string' ? errorTexts[route.query.error] ?? '' : ''))

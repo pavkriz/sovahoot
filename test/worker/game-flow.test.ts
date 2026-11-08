@@ -143,6 +143,27 @@ describe('game flow over websockets', () => {
     ;[host, alice, bob].forEach((c) => c.close())
   })
 
+  it('removes a player who leaves the lobby and refuses newcomers after the podium', async () => {
+    const { host, alice, bob } = await setup()
+    bob.send({ type: 'leave' })
+    await host.until((s) => s.players.length === 1 && s.players[0]?.id === 'p-alice')
+
+    host.send({ type: 'start', phase: 'lobby' })
+    for (let i = 0; i <= LAST; i++) {
+      await alice.until((s) => s.phase === 'question' && s.question?.index === i)
+      alice.send({ type: 'answer', questionIndex: i, answerIndex: correct(i) })
+      await host.until((s) => s.phase === 'reveal' && s.question?.index === i)
+      host.send({ type: 'next', phase: 'reveal', questionIndex: i, skipLeaderboard: true })
+    }
+    await host.until((s) => s.phase === 'podium')
+
+    const late = await WsClient.connect(playerPath(PIN, 'p-late', 'Late'))
+    const err = await late.untilError()
+    expect(err.code).toBe('game_over')
+    expect(host.latest?.players.some((p) => p.id === 'p-late')).toBe(false)
+    ;[host, alice, late].forEach((c) => c.close())
+  })
+
   it('rejects a second player with the same nickname', async () => {
     const { host, alice, bob } = await setup()
     const dup = await WsClient.connect(playerPath(PIN, 'p-other', 'alice'))

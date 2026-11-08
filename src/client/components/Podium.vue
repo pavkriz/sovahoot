@@ -3,7 +3,7 @@ import { computed } from 'vue'
 import type { LeaderboardEntry } from '../../shared/types'
 import AvatarView from './Avatar.vue'
 
-const props = defineProps<{ entries: LeaderboardEntry[] }>()
+const props = withDefaults(defineProps<{ entries: LeaderboardEntry[]; highlightId?: string | null }>(), { highlightId: null })
 
 // Always three steps in visual order 2nd – 1st – 3rd, even with fewer players.
 const slots = computed(() => [
@@ -16,7 +16,14 @@ const medals: Record<number, string> = { 1: '🥇', 2: '🥈', 3: '🥉' }
 
 <template>
   <div class="podium" data-testid="podium">
-    <div v-for="s in slots" :key="s.place" class="slot" data-testid="podium-slot" :data-empty="s.entry ? undefined : 'true'">
+    <div
+      v-for="s in slots"
+      :key="s.place"
+      class="slot"
+      :class="{ me: s.entry && s.entry.id === highlightId }"
+      data-testid="podium-slot"
+      :data-empty="s.entry ? undefined : 'true'"
+    >
       <template v-if="s.entry">
         <AvatarView :avatar="s.entry.avatar" :size="s.place === 1 ? 72 : 56" />
         <div class="name">{{ s.entry.nickname }}</div>
@@ -62,5 +69,12 @@ const medals: Record<number, string> = { 1: '🥇', 2: '🥈', 3: '🥉' }
 }
 .block.empty {
   background: rgba(255, 255, 255, 0.55);
+}
+.slot.me .block {
+  outline: 4px solid var(--yellow);
+  outline-offset: -4px;
+}
+.slot.me .name {
+  color: var(--yellow);
 }
 </style>

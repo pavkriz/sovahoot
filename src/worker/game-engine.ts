@@ -47,7 +47,7 @@ export interface EngineState {
   players: PlayerRecord[]
 }
 
-export type JoinResult = { ok: true } | { ok: false; code: Extract<ErrorCode, 'nickname_taken' | 'invalid_nickname'> }
+export type JoinResult = { ok: true } | { ok: false; code: Extract<ErrorCode, 'nickname_taken' | 'invalid_nickname' | 'game_over'> }
 
 function emptyState(): EngineState {
   return {
@@ -120,21 +120,43 @@ export class GameEngine {
 
   join(playerId: string, rawNickname: string, avatar?: Avatar): JoinResult {
     const existing = this.find(playerId)
+    const nickname = rawNickname.trim()
     if (existing) {
-      // Reconnect: identity is the playerId, the nickname stays what it was.
       existing.connected = true
+      if (this.s.phase === 'lobby') {
+        // Back in the lobby (e.g. browser Back, then the join form again): honour the new choices.
+        if (avatar) existing.avatar = normalizeAvatar(avatar)
+        if (nickname.length > 0 && nickname.length <= MAX_NICKNAME_LENGTH && !this.nicknameTaken(nickname, playerId)) {
+          existing.nickname = nickname
+        }
+      }
+      // Mid-game reconnect: identity is the playerId, nickname and avatar stay what they were.
       return { ok: true }
     }
-    const nickname = rawNickname.trim()
+    if (this.s.phase === 'podium') return { ok: false, code: 'game_over' }
     if (nickname.length === 0 || nickname.length > MAX_NICKNAME_LENGTH) {
       return { ok: false, code: 'invalid_nickname' }
     }
-    const lower = nickname.toLowerCase()
-    if (this.s.players.some((p) => p.nickname.toLowerCase() === lower)) {
-      return { ok: false, code: 'nickname_taken' }
-    }
+    if (this.nicknameTaken(nickname, playerId)) return { ok: false, code: 'nickname_taken' }
     this.s.players.push({ id: playerId, nickname, avatar: normalizeAvatar(avatar), score: 0, connected: true, answers: {} })
     return { ok: true }
+  }
+
+  /** Leaving the lobby frees the seat; leaving mid-game only disconnects (score and answers stay). */
+  leave(playerId: string): boolean {
+    const p = this.find(playerId)
+    if (!p) return false
+    if (this.s.phase === 'lobby') {
+      this.s.players = this.s.players.filter((x) => x.id !== playerId)
+    } else {
+      p.connected = false
+    }
+    return true
+  }
+
+  private nicknameTaken(nickname: string, exceptPlayerId: string): boolean {
+    const lower = nickname.toLowerCase()
+    return this.s.players.some((p) => p.id !== exceptPlayerId && p.nickname.toLowerCase() === lower)
   }
 
   /** Connection status only; a disconnected player keeps their seat and score. */

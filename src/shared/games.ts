@@ -54,14 +54,14 @@ export const GAMES: Game[] = [
       },
       {
         text: 'Olej se ve vodě rozpustí.',
-        answers: ['Pravda', 'Lež'],
-        correctIndex: 1,
+        answers: ['Lež', 'Pravda'],
+        correctIndex: 0,
         timeLimitSec: 20,
       },
       {
         text: 'Patří borůvka, třešeň a rybíz do stejného druhu plodů?',
-        answers: ['Ano', 'Ne'],
-        correctIndex: 1,
+        answers: ['Ne', 'Ano'],
+        correctIndex: 0,
         timeLimitSec: 30,
       },
     ],

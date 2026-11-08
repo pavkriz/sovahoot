@@ -84,16 +84,16 @@ export const HAT_DEFAULTS: Record<string, Delta> = {
   '👑': { r: 6 },
   '🧢': { x: 0.02, y: 0.03, r: 6 },
   '🎓': { y: 0.04, r: -4 }, // the tassel hangs below the board, so the board must sit lower
-  '🎀': { x: 0.1, y: 0.03, r: 21, s: 0.8 },
+  '🎀': { x: 0.1, y: 0.05, r: 21, s: 0.8 },
 }
 
 /** Per-character tweaks: where the head's crown is in each glyph. */
 export const HAT_FIT: Record<string, CharacterFit> = {
   '🦉': { base: { y: 0.02, s: 0.9 } },
-  '🦊': { base: { y: 0.01, s: 0.85 } },
+  '🦊': { base: { y: 0.03, s: 0.85 } },
   '🐸': { base: { y: 0.03 } },
   '🐼': { base: {} },
-  '🐱': { base: { y: 0.01, s: 0.85 } },
+  '🐱': { base: { y: 0.03, s: 0.85 } },
   '🐶': { base: { y: 0.02 } },
   '🦁': { base: {} },
   '🐨': { base: { y: 0.03 } },
@@ -111,4 +111,22 @@ export function hatPlacement(character: string, hat: string | null): HatPlacemen
   if (!hat) return { ...DEFAULT_PLACEMENT }
   const fit = HAT_FIT[character]
   return add(add(add(DEFAULT_PLACEMENT, HAT_DEFAULTS[hat]), fit?.base), fit?.hats?.[hat])
+}
+
+// ---- "Náhodně" roulette ------------------------------------------------------------------------
+
+/**
+ * Delays (ms) between successive random avatars when the player hits "Náhodně": quick at first,
+ * slowing down, and all over in well under two seconds.
+ */
+export function spinDelays(): number[] {
+  const delays: number[] = []
+  let delay = 60
+  let total = 0
+  while (total + delay <= 1800) {
+    delays.push(Math.round(delay))
+    total += delay
+    delay *= 1.25
+  }
+  return delays
 }

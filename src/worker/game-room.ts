@@ -55,7 +55,8 @@ export class GameRoom extends DurableObject<Env> {
     const role: Role = url.searchParams.get('role') === 'host' ? 'host' : 'player'
     const playerId = url.searchParams.get('playerId')
     const nickname = url.searchParams.get('nickname') ?? ''
-    const avatar = decodeAvatar(url.searchParams.get('avatar'))
+    const avatarParam = url.searchParams.get('avatar')
+    const avatar = avatarParam ? decodeAvatar(avatarParam) : undefined
 
     switch (url.pathname) {
       case '/ws':
@@ -96,7 +97,7 @@ export class GameRoom extends DurableObject<Env> {
     role: Role,
     playerId: string | null,
     nickname: string,
-    avatar: Avatar,
+    avatar: Avatar | undefined,
   ): Promise<Response> {
     if (request.headers.get('Upgrade')?.toLowerCase() !== 'websocket') {
       return json({ error: 'expected websocket' }, 426)
@@ -120,7 +121,7 @@ export class GameRoom extends DurableObject<Env> {
     return new Response(null, { status: 101, webSocket: client })
   }
 
-  private async joinOrReconnect(engine: GameEngine, playerId: string, nickname: string, avatar: Avatar) {
+  private async joinOrReconnect(engine: GameEngine, playerId: string, nickname: string, avatar: Avatar | undefined) {
     return this.mutateWith(() => {
       const result = engine.join(playerId, nickname, avatar)
       return { changed: result.ok, result }
@@ -148,6 +149,13 @@ export class GameRoom extends DurableObject<Env> {
     if (attachment.role === 'player') {
       if (msg.type === 'answer' && attachment.playerId) {
         await this.mutate(() => engine.answer(attachment.playerId!, msg.questionIndex, msg.answerIndex, now))
+      } else if (msg.type === 'leave' && attachment.playerId) {
+        await this.mutate(() => engine.leave(attachment.playerId!))
+        try {
+          ws.close(1000, 'leave')
+        } catch {
+          // already closed
+        }
       } else {
         send(ws, { type: 'error', code: 'not_allowed', message: errorText('not_allowed') })
       }
@@ -282,6 +290,8 @@ export function errorText(code: ErrorCode): string {
       return 'Tuhle přezdívku už někdo používá. Zvol si jinou.'
     case 'invalid_nickname':
       return 'Přezdívka musí mít 1 až 20 znaků.'
+    case 'game_over':
+      return 'Tahle hra už skončila. Počkej, až moderátor spustí novou, a zkus to znovu.'
     case 'not_allowed':
       return 'Tuhle akci nemůžeš provést.'
     case 'bad_message':

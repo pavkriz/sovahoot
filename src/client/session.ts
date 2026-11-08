@@ -26,8 +26,9 @@ export function loadPlayer(): PlayerSession | null {
     const raw = localStorage.getItem(KEY)
     if (!raw) return null
     const parsed = JSON.parse(raw) as Partial<PlayerSession>
-    if (!parsed.playerId || !parsed.nickname || !parsed.pin) return null
-    return { playerId: parsed.playerId, nickname: parsed.nickname, pin: parsed.pin, avatar: normalizeAvatar(parsed.avatar) }
+    if (!parsed.playerId || !parsed.nickname) return null
+    // `pin` is '' after the player left a game; nickname and avatar stay for the next join form.
+    return { playerId: parsed.playerId, nickname: parsed.nickname, pin: parsed.pin ?? '', avatar: normalizeAvatar(parsed.avatar) }
   }, null)
 }
 
@@ -41,6 +42,13 @@ export function savePlayer(nickname: string, pin: string, avatar: Avatar): Playe
   }
   safe(() => localStorage.setItem(KEY, JSON.stringify(session)), undefined)
   return session
+}
+
+/** Leaving a game: forget which room we were in, keep identity and preferences. */
+export function clearPin(): void {
+  const existing = loadPlayer()
+  if (!existing) return
+  safe(() => localStorage.setItem(KEY, JSON.stringify({ ...existing, pin: '' })), undefined)
 }
 
 /** A new identity, e.g. when the chosen nickname was rejected and the player picks another. */

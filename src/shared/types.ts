@@ -106,7 +106,7 @@ export interface HostSnapshot extends SnapshotBase {
 
 export type Snapshot = PlayerSnapshot | HostSnapshot
 
-export type ErrorCode = 'nickname_taken' | 'invalid_nickname' | 'not_allowed' | 'bad_message'
+export type ErrorCode = 'nickname_taken' | 'invalid_nickname' | 'game_over' | 'not_allowed' | 'bad_message'
 
 export interface ErrorMessage {
   type: 'error'
@@ -118,6 +118,8 @@ export type ServerMessage = Snapshot | ErrorMessage | { type: 'pong' }
 
 export type ClientMessage =
   | { type: 'answer'; questionIndex: number; answerIndex: number }
+  /** Player: leave the game (removed from the lobby; mid-game only marked disconnected). */
+  | { type: 'leave' }
   /** Host: lobby → first question. `phase` is the phase the host believes it is in (idempotence). */
   | { type: 'start'; phase: Phase }
   /**

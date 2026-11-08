@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { CHARACTERS, COLORS, DEFAULT_AVATAR, DEFAULT_PLACEMENT, decodeAvatar, encodeAvatar, HATS, hatPlacement, normalizeAvatar, randomAvatar } from './avatars'
+import { CHARACTERS, COLORS, DEFAULT_AVATAR, DEFAULT_PLACEMENT, decodeAvatar, encodeAvatar, HATS, hatPlacement, normalizeAvatar, randomAvatar, spinDelays } from './avatars'
 
 describe('avatars', () => {
   it('normalises unknown parts to defaults and keeps valid ones', () => {
@@ -50,5 +50,15 @@ describe('avatars', () => {
     // Unknown character: still the hat's generic placement, never a crash.
     sane(hatPlacement('💣', '👑'))
     expect(hatPlacement('🦊', null)).toEqual(DEFAULT_PLACEMENT)
+  })
+})
+
+describe('spinDelays', () => {
+  it('slows down and finishes in under two seconds', () => {
+    const d = spinDelays()
+    expect(d.length).toBeGreaterThanOrEqual(8)
+    for (let i = 1; i < d.length; i++) expect(d[i]!).toBeGreaterThanOrEqual(d[i - 1]!)
+    expect(d.reduce((a, b) => a + b, 0)).toBeLessThanOrEqual(2000)
+    expect(d[0]).toBeLessThanOrEqual(100)
   })
 })

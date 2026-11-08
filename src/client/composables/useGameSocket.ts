@@ -41,7 +41,7 @@ export interface GameSocket {
   disconnect: () => void
 }
 
-const FATAL_CODES = new Set<ErrorMessage['code']>(['nickname_taken', 'invalid_nickname'])
+const FATAL_CODES = new Set<ErrorMessage['code']>(['nickname_taken', 'invalid_nickname', 'game_over'])
 
 export function useGameSocket(opts: GameSocketOptions): GameSocket {
   const pingIntervalMs = opts.pingIntervalMs ?? 20_000

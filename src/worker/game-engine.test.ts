@@ -93,6 +93,49 @@ describe('lobby & joining', () => {
     expect(copy.snapshotFor('host', null, T0).players[0]?.avatar).toEqual(DEFAULT_AVATAR)
   })
 
+  it('leave in the lobby frees the seat, mid-game it only disconnects', () => {
+    const e = lobbyWithTwo()
+    expect(e.leave('p2')).toBe(true)
+    expect(e.snapshotFor('host', null, T0).players.map((p) => p.id)).toEqual(['p1'])
+    expect(e.leave('ghost')).toBe(false)
+    const g = started()
+    g.answer('p1', 0, 1, T0)
+    expect(g.leave('p1')).toBe(true)
+    const p1 = g.snapshotFor('host', null, T0).players.find((p) => p.id === 'p1')
+    expect(p1).toMatchObject({ connected: false, score: 1000 })
+  })
+
+  it('rejects new players once the game is over, but lets known players back in', () => {
+    const e = started()
+    e.next('question', 0, T0)
+    e.next('reveal', 0, T0, { skipLeaderboard: true })
+    e.next('question', 1, T0)
+    e.next('reveal', 1, T0, { skipLeaderboard: true })
+    expect(e.phase).toBe('podium')
+    expect(e.join('p9', 'Late')).toEqual({ ok: false, code: 'game_over' })
+    e.setConnected('p1', false)
+    expect(e.join('p1', 'Alice')).toEqual({ ok: true })
+  })
+
+  it('re-joining the lobby takes the new avatar and nickname, mid-game reconnect keeps the old ones', () => {
+    const e = new GameEngine(game)
+    e.join('p1', 'Alice', { character: '🦊', hat: null, color: '#118ab2' })
+    e.join('p2', 'Bob')
+    e.setConnected('p1', false)
+    expect(e.join('p1', 'Alenka', { character: '🐼', hat: '👑', color: '#ef476f' })).toEqual({ ok: true })
+    expect(e.snapshotFor('host', null, T0).players[0]).toMatchObject({
+      nickname: 'Alenka',
+      avatar: { character: '🐼', hat: '👑', color: '#ef476f' },
+      connected: true,
+    })
+    // A nickname someone else holds is ignored, the rest still applies.
+    e.join('p1', 'bob', { character: '🐸', hat: null, color: '#ffd166' })
+    expect(e.snapshotFor('host', null, T0).players[0]).toMatchObject({ nickname: 'Alenka', avatar: { character: '🐸' } })
+    e.start('s', T0)
+    e.join('p1', 'Someone', { character: '🦁', hat: null, color: '#ffd166' })
+    expect(e.snapshotFor('host', null, T0).players[0]).toMatchObject({ nickname: 'Alenka', avatar: { character: '🐸' } })
+  })
+
   it('disconnect does not remove the player', () => {
     const e = lobbyWithTwo()
     e.setConnected('p2', false)

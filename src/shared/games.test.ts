@@ -26,6 +26,24 @@ describe('hardcoded games', () => {
     }
   })
 
+  it('put the negative answer first (red) for yes/no and true/false questions', () => {
+    const pairs = [
+      ['ne', 'ano'],
+      ['lež', 'pravda'],
+      ['špatně', 'správně'],
+    ]
+    for (const g of GAMES) {
+      for (const q of g.questions) {
+        const lower = q.answers.map((a) => a.toLowerCase())
+        for (const [negative, positive] of pairs) {
+          if (lower.length === 2 && lower.includes(negative!) && lower.includes(positive!)) {
+            expect(lower, `${q.text}: negative answer must be first`).toEqual([negative, positive])
+          }
+        }
+      }
+    }
+  })
+
   it('reference images that exist under public/', () => {
     const publicDir = path.resolve(import.meta.dirname, '../../public')
     for (const g of GAMES) {

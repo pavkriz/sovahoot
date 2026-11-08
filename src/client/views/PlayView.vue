@@ -10,11 +10,11 @@ import Countdown from '../components/Countdown.vue'
 import Leaderboard from '../components/Leaderboard.vue'
 import Podium from '../components/Podium.vue'
 import { useGameSocket } from '../composables/useGameSocket'
-import { loadPlayer } from '../session'
+import { clearPin, loadPlayer } from '../session'
 
 const router = useRouter()
 const session = loadPlayer()
-if (!session) void router.replace('/')
+if (!session || !session.pin) void router.replace('/')
 
 const sock = useGameSocket({
   pin: session?.pin ?? '0000',
@@ -26,10 +26,18 @@ const sock = useGameSocket({
 
 watch(sock.error, (err) => {
   if (!err) return
-  if (err.code === 'nickname_taken' || err.code === 'invalid_nickname' || err.code === 'not_allowed') {
+  if (err.code === 'nickname_taken' || err.code === 'invalid_nickname' || err.code === 'not_allowed' || err.code === 'game_over') {
     void router.replace({ path: '/', query: { error: err.code } })
   }
 })
+
+/** Leave the room for good (lobby seat is freed; mid-game the seat survives a later return). */
+function leave() {
+  sock.send({ type: 'leave' })
+  sock.disconnect()
+  clearPin()
+  void router.replace('/')
+}
 
 const snap = computed(() => sock.snapshot.value as PlayerSnapshot | null)
 const me = computed(() => snap.value?.me ?? null)
@@ -69,6 +77,7 @@ const rankText = computed(() => (me.value && me.value.rank > 0 ? `${me.value.ran
         {{ snap.title }} · hráčů: {{ snap.players.length }}<br />
         Počkej, až moderátor hru spustí.
       </p>
+      <button class="ghost" style="margin-top: 1.5rem" data-testid="leave-button" @click="leave">Odejít</button>
     </template>
 
     <!-- Question -->
@@ -131,11 +140,49 @@ const rankText = computed(() => (me.value && me.value.rank > 0 ? `${me.value.ran
 
     <!-- Podium -->
     <template v-else-if="snap.phase === 'podium'">
-      <h1>Konec hry</h1>
-      <AvatarView v-if="me" :avatar="me.avatar" :size="96" />
-      <p data-testid="final-rank">Skončil(a) jsi na <strong>{{ rankText }}</strong> s {{ me?.score ?? 0 }} body.</p>
-      <Podium :entries="snap.leaderboard" />
-      <router-link to="/" class="ghost" style="margin-top: 1.5rem">Zpět na začátek</router-link>
+      <h1>Konec hry <span class="emoji">🎉</span></h1>
+      <section class="result-block">
+        <h2 class="block-title">Tvůj výsledek</h2>
+        <div class="card me-card" data-testid="final-rank">
+          <AvatarView v-if="me" :avatar="me.avatar" :size="64" />
+          <div>
+            <strong>{{ rankText }}</strong>
+            <div class="muted">{{ me?.score ?? 0 }} bodů</div>
+          </div>
+        </div>
+      </section>
+      <section class="result-block">
+        <h2 class="block-title">Stupně vítězů</h2>
+        <Podium :entries="snap.leaderboard" :highlight-id="me?.id" />
+      </section>
+      <button class="ghost" style="margin-top: 1.5rem" data-testid="leave-button" @click="leave">Zpět na začátek</button>
     </template>
   </main>
 </template>
+
+<style scoped>
+.result-block {
+  width: 100%;
+  max-width: 560px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+.block-title {
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.8;
+  margin: 0;
+}
+.me-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  text-align: left;
+  font-size: 1.4rem;
+  padding: 1rem 1.25rem;
+}
+</style>

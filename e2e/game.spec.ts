@@ -99,6 +99,8 @@ test('host and two players play a whole game, one player reloads mid-question', 
   await expect(host.locator('[data-testid=podium-slot][data-empty]')).toHaveCount(1)
   await expect(alice.getByTestId('final-rank')).toContainText('1. místo')
   await expect(bob.getByTestId('final-rank')).toContainText('2. místo')
+  await expect(alice.locator('main')).toContainText('Tvůj výsledek')
+  await expect(alice.locator('main')).toContainText('Stupně vítězů')
 
   // Results landed in D1 and show up in the history page.
   const history = await browser.newPage()
@@ -130,4 +132,32 @@ test('a taken nickname is rejected and the player is sent back to the join form'
   await host.getByTestId('reset-button').click()
   await expect(host.getByTestId('player-count')).toHaveText('Hráčů: 0')
   await alice.close()
+})
+
+test('a player can leave the lobby, and re-joining after Back applies the new avatar', async ({ browser }) => {
+  const host = await openHost(browser)
+
+  // Leave with the button: the seat is freed.
+  const leaver = await joinAsPlayer(browser, 'Odcházím')
+  await expect(host.getByTestId('player-count')).toHaveText('Hráčů: 1')
+  await leaver.getByTestId('leave-button').click()
+  await expect(leaver).toHaveURL(/\/$/)
+  await expect(host.getByTestId('player-count')).toHaveText('Hráčů: 0')
+
+  // Browser Back (no leave message), then the join form again with another avatar.
+  const alice = await joinAsPlayer(browser, 'Alice', { character: 1, hat: 1 }) // 🦊
+  await expect(host.getByTestId('player-chip').filter({ hasText: 'Alice' })).toContainText('🦊')
+  await alice.goBack()
+  await expect(alice.getByTestId('join-button')).toBeVisible()
+  await alice.getByTestId('avatar-character-3').click() // 🐼
+  await alice.getByTestId('join-button').click()
+  await expect(alice.getByTestId('my-nickname')).toHaveText('Alice')
+  const chip = host.getByTestId('player-chip').filter({ hasText: 'Alice' })
+  await expect(chip).toContainText('🐼')
+  await expect(chip).not.toContainText('🦊')
+  await expect(host.getByTestId('player-count')).toHaveText('Hráčů: 1')
+
+  host.once('dialog', (d) => d.accept())
+  await host.getByTestId('reset-button').click()
+  await expect(host.getByTestId('player-count')).toHaveText('Hráčů: 0')
 })

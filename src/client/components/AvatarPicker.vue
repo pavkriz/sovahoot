@@ -1,19 +1,52 @@
 <script setup lang="ts">
-import { CHARACTERS, COLORS, HATS, randomAvatar, type Avatar } from '../../shared/avatars'
+import { onBeforeUnmount, ref } from 'vue'
+import { CHARACTERS, COLORS, HATS, randomAvatar, spinDelays, type Avatar } from '../../shared/avatars'
 import AvatarView from './Avatar.vue'
 
 const model = defineModel<Avatar>({ required: true })
+const spinning = ref(false)
+let timer: ReturnType<typeof setTimeout> | null = null
 
 function set<K extends keyof Avatar>(key: K, value: Avatar[K]) {
   model.value = { ...model.value, [key]: value }
 }
+
+/** Roulette: flick through random avatars, slowing down, and stop on the last one (< 2 s). */
+function spin() {
+  if (spinning.value) return
+  const reduced = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches
+  if (reduced) {
+    model.value = randomAvatar()
+    return
+  }
+  const delays = spinDelays()
+  spinning.value = true
+  let step = 0
+  const tick = () => {
+    model.value = randomAvatar()
+    step++
+    if (step < delays.length) {
+      timer = setTimeout(tick, delays[step])
+    } else {
+      timer = null
+      spinning.value = false
+    }
+  }
+  timer = setTimeout(tick, delays[0])
+}
+
+onBeforeUnmount(() => {
+  if (timer) clearTimeout(timer)
+})
 </script>
 
 <template>
   <div class="picker" data-testid="avatar-picker">
     <div class="preview">
       <AvatarView :avatar="model" :size="96" />
-      <button type="button" class="ghost small" data-testid="avatar-random" @click="model = randomAvatar()"><span class="emoji">🎲</span> Náhodně</button>
+      <button type="button" class="ghost small" data-testid="avatar-random" :disabled="spinning" :data-spinning="spinning || undefined" @click="spin">
+        <span class="emoji">🎲</span> Náhodně
+      </button>
     </div>
 
     <p class="label">Postavička</p>
