@@ -15,6 +15,11 @@ describe('avatars', () => {
     expect(normalizeAvatar('🦊')).toEqual(DEFAULT_AVATAR)
   })
 
+  it('offers 8 distinct hats', () => {
+    expect(HATS).toHaveLength(8)
+    expect(new Set(HATS).size).toBe(8)
+  })
+
   it('offers 21 distinct characters including the polar bear ZWJ sequence', () => {
     expect(CHARACTERS).toHaveLength(21)
     expect(new Set(CHARACTERS).size).toBe(21)
