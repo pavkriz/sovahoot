@@ -1,7 +1,6 @@
 import type { Game, GameSummary } from './types'
 
 // Hardcoded games. PINs are fixed and reused every session; the host resets the room between runs.
-// Hardcoded games. PINs are fixed and reused every session; the host resets the room between runs.
 export const GAMES: Game[] = [
   {
     id: 'trida-3a',
@@ -63,6 +62,13 @@ export const GAMES: Game[] = [
         answers: ['Ne', 'Ano'],
         correctIndex: 0,
         timeLimitSec: 30,
+      },
+      {
+        // 5 chyb: Vánoce, slaví, tečka za 24, malé p v „prosince“, tečka na konci věty.
+        text: 'Kolik chyb je ve větě „Vanoce se slavi 24 Prosince“?',
+        answers: ['4', '0', '3', '5'],
+        correctIndex: 3,
+        timeLimitSec: 45,
       },
     ],
   },
