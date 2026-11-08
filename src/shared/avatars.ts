@@ -7,8 +7,13 @@ export interface Avatar {
   color: string
 }
 
-// sova, liška, žába, panda, kočka, pes, lev, koala, prase, opice, jednorožec
-export const CHARACTERS = ['🦉', '🦊', '🐸', '🐼', '🐱', '🐶', '🦁', '🐨', '🐷', '🐵', '🦄'] as const
+// sova, liška, žába, panda, kočka, pes, lev, koala, prase, opice, jednorožec,
+// medvěd, lední medvěd, křeček, králík, myš, tygr, vlk, kuřátko, kráva, kůň
+// (new ones go at the end: the join form and e2e tests address characters by index)
+export const CHARACTERS = [
+  '🦉', '🦊', '🐸', '🐼', '🐱', '🐶', '🦁', '🐨', '🐷', '🐵', '🦄',
+  '🐻', '🐻‍❄️', '🐹', '🐰', '🐭', '🐯', '🐺', '🐥', '🐮', '🐴',
+] as const
 // cylindr, koruna, kšiltovka, akademická čepice, mašle
 export const HATS = ['🎩', '👑', '🧢', '🎓', '🎀'] as const
 export const COLORS = ['#ffd166', '#06d6a0', '#118ab2', '#ef476f', '#8338ec', '#3a86ff', '#fb5607'] as const
@@ -102,6 +107,16 @@ export const HAT_FIT: Record<string, CharacterFit> = {
   '🐷': { base: { y: 0.05 } }, // prase
   '🐵': { base: { y: 0.03 } }, // opice
   '🦄': { base: { x: 0.1, y: 0.05, r: 16, s: 0.8 } }, // jednorožec
+  '🐻': { base: { y: 0.07 } }, // medvěd
+  '🐻‍❄️': { base: { y: 0.07 } }, // lední medvěd
+  '🐹': { base: { y: 0.07 } }, // křeček
+  '🐰': { base: { y: 0.16, s: 0.75 } }, // králík (dlouhé uši, pokrývka až na hlavě pod nimi)
+  '🐭': { base: { y: 0.08 } }, // myš
+  '🐯': { base: { y: 0.1, s: 0.85 } }, // tygr
+  '🐺': { base: { y: 0.1, s: 0.85 } }, // vlk
+  '🐥': { base: { y: 0.1, s: 0.8 } }, // kuřátko
+  '🐮': { base: { y: 0.08, s: 0.85 } }, // kráva (růžky)
+  '🐴': { base: { x: 0.1, y: 0.05, r: 16, s: 0.8 } }, // kůň (hlava z profilu jako jednorožec)
 }
 
 function add(a: HatPlacement, d: Delta | undefined): HatPlacement {

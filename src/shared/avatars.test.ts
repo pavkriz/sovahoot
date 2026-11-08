@@ -15,6 +15,13 @@ describe('avatars', () => {
     expect(normalizeAvatar('🦊')).toEqual(DEFAULT_AVATAR)
   })
 
+  it('offers 21 distinct characters including the polar bear ZWJ sequence', () => {
+    expect(CHARACTERS).toHaveLength(21)
+    expect(new Set(CHARACTERS).size).toBe(21)
+    expect(CHARACTERS).toContain('🐻‍❄️')
+    expect(normalizeAvatar({ character: '🐻‍❄️', hat: null, color: COLORS[0] }).character).toBe('🐻‍❄️')
+  })
+
   it('generates only valid random avatars', () => {
     for (let i = 0; i < 200; i++) {
       const a = randomAvatar()
@@ -41,7 +48,7 @@ describe('avatars', () => {
     const sane = (p: ReturnType<typeof hatPlacement>) => {
       expect(Math.abs(p.x)).toBeLessThanOrEqual(0.3)
       expect(p.y).toBeGreaterThanOrEqual(-0.4)
-      expect(p.y).toBeLessThanOrEqual(0.4)
+      expect(p.y).toBeLessThanOrEqual(0.5)
       expect(p.s).toBeGreaterThanOrEqual(0.4)
       expect(p.s).toBeLessThanOrEqual(1.5)
       expect(Number.isFinite(p.r)).toBe(true)
