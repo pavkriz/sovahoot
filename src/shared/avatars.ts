@@ -108,13 +108,13 @@ export const HAT_FIT: Record<string, CharacterFit> = {
   '🐵': { base: { y: 0.03 } }, // opice
   '🦄': { base: { x: 0.1, y: 0.05, r: 16, s: 0.8 } }, // jednorožec
   '🐻': { base: { y: 0.07 } }, // medvěd
-  '🐻‍❄️': { base: { y: 0.07 } }, // lední medvěd
-  '🐹': { base: { y: 0.07 } }, // křeček
-  '🐰': { base: { y: 0.16, s: 0.75 } }, // králík (dlouhé uši, pokrývka až na hlavě pod nimi)
-  '🐭': { base: { y: 0.08 } }, // myš
-  '🐯': { base: { y: 0.1, s: 0.85 } }, // tygr
+  '🐻‍❄️': { base: { y: 0.01} }, // lední medvěd
+  '🐹': { base: { y: 0.09 } }, // křeček
+  '🐰': { base: { y: 0.24, s: 0.75 } }, // králík (dlouhé uši, pokrývka až na hlavě pod nimi)
+  '🐭': { base: { y: 0.18 } }, // myš
+  '🐯': { base: { y: 0.0, s: 0.85 } }, // tygr
   '🐺': { base: { y: 0.1, s: 0.85 } }, // vlk
-  '🐥': { base: { y: 0.1, s: 0.8 } }, // kuřátko
+  '🐥': { base: { y: 0.0, s: 0.8 } }, // kuřátko
   '🐮': { base: { y: 0.08, s: 0.85 } }, // kráva (růžky)
   '🐴': { base: { x: 0.1, y: 0.05, r: 16, s: 0.8 } }, // kůň (hlava z profilu jako jednorožec)
 }
