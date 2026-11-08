@@ -15,7 +15,7 @@ const emit = defineEmits<{ leave: []; unauthorized: [] }>()
 const sock = useGameSocket({ pin: props.game.pin, role: 'host', token: props.token })
 const snap = computed(() => sock.snapshot.value as HostSnapshot | null)
 const question = computed(() => snap.value?.question ?? null)
-const joinUrl = computed(() => `${location.host}/?pin=${props.game.pin}`)
+const joinUrl = computed(() => location.host)
 
 watch(sock.error, (err) => {
   if (err?.code === 'not_allowed') emit('unauthorized')
@@ -99,7 +99,7 @@ const maxCount = computed(() => Math.max(1, ...(snap.value?.answerCounts ?? [0])
 
     <!-- Lobby -->
     <section v-else-if="snap.phase === 'lobby'" class="screen center" style="min-height: 0; flex: 1; padding: 0">
-      <p style="opacity: 0.8">Připoj se na <strong>{{ joinUrl }}</strong></p>
+      <p style="opacity: 0.9; font-size: clamp(1.4rem, 4vw, 2.4rem)">Připoj se na <strong>{{ joinUrl }}</strong></p>
       <p style="opacity: 0.8; margin: 0">PIN hry</p>
       <p class="big" data-testid="lobby-pin">{{ game.pin }}</p>
       <p data-testid="player-count">Hráčů: {{ snap.players.length }}</p>
