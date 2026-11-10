@@ -32,16 +32,19 @@ describe('avatars', () => {
     expect(composites).toEqual(['🌍👀', '🎄👀'])
     for (const id of Object.keys(COMPOSITES)) {
       expect(CHARACTERS).toContain(id)
-      const { base, overlay } = COMPOSITES[id]!
+      const { base, scale, overlay } = COMPOSITES[id]!
       expect(base + overlay.glyph).toBe(id)
+      expect(scale ?? 1).toBeGreaterThanOrEqual(0.5)
+      expect(scale ?? 1).toBeLessThanOrEqual(1.6)
       expect(Math.abs(overlay.x)).toBeLessThanOrEqual(0.3)
       expect(Math.abs(overlay.y)).toBeLessThanOrEqual(0.3)
       expect(overlay.s).toBeGreaterThanOrEqual(0.2)
       expect(overlay.s).toBeLessThanOrEqual(1)
       expect(Number.isFinite(overlay.r)).toBe(true)
     }
-    expect(characterParts('🎄👀')).toEqual({ base: '🎄', overlay: COMPOSITES['🎄👀']!.overlay })
-    expect(characterParts('🦊')).toEqual({ base: '🦊', overlay: null })
+    expect(characterParts('🎄👀')).toEqual({ base: '🎄', scale: 1.25, overlay: COMPOSITES['🎄👀']!.overlay })
+    expect(characterParts('🌍👀').scale).toBe(1)
+    expect(characterParts('🦊')).toEqual({ base: '🦊', scale: 1, overlay: null })
   })
 
   it('accepts composite characters and drops the retired plain globe', () => {

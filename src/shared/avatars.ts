@@ -69,6 +69,8 @@ export function decodeAvatar(raw: string | null | undefined): Avatar {
 // glyphs joined, so validation, the protocol and storage treat it like any other character.
 // Overlay units are fractions of the base glyph size (positive y = lower), rotation in degrees,
 // scale relative to the base glyph. Tuned visually on the /avatars sheet like the hats.
+// The optional `scale` enlarges the whole character (base and eyes together, so eye placement
+// stays valid); hats are positioned against the avatar circle, so HAT_FIT may need a nudge after.
 
 export interface Overlay {
   glyph: string
@@ -78,15 +80,24 @@ export interface Overlay {
   s: number
 }
 
-export const COMPOSITES: Record<string, { base: string; overlay: Overlay }> = {
+export interface Composite {
+  base: string
+  /** Size of the whole character relative to a normal one (default 1). */
+  scale?: number
+  overlay: Overlay
+}
+
+export const COMPOSITES: Record<string, Composite> = {
   '🌍👀': { base: '🌍', overlay: { glyph: '👀', x: 0, y: -0.05, r: 0, s: 0.55 } }, // zeměkoule s očima
-  '🎄👀': { base: '🎄', overlay: { glyph: '👀', x: 0, y: 0.05, r: 0, s: 0.45 } }, // vánoční stromek s očima
+  '🎄👀': { base: '🎄', scale: 1.25, overlay: { glyph: '👀', x: 0, y: 0.05, r: 0, s: 0.45 } }, // vánoční stromek s očima
 }
 
 /** Splits a character into the glyph drawn underneath and the optional overlay on top. */
-export function characterParts(character: string): { base: string; overlay: Overlay | null } {
+export function characterParts(character: string): { base: string; scale: number; overlay: Overlay | null } {
   const composite = COMPOSITES[character]
-  return composite ? { base: composite.base, overlay: composite.overlay } : { base: character, overlay: null }
+  return composite
+    ? { base: composite.base, scale: composite.scale ?? 1, overlay: composite.overlay }
+    : { base: character, scale: 1, overlay: null }
 }
 
 // ---- hat placement -------------------------------------------------------------------------
@@ -150,7 +161,7 @@ export const HAT_FIT: Record<string, CharacterFit> = {
   '🎃': { base: { y: 0.1 } }, // halloweenská dýně (stopka nahoře)
   '💀': { base: { y: 0.02 } }, // lebka
   '🌍👀': { base: { y: 0.02 } }, // zeměkoule s očima
-  '🎄👀': { base: { y: -0.02, s: 0.8 } }, // vánoční stromek s očima (úzká špička nahoře)
+  '🎄👀': { base: { y: -0.06, s: 0.8 } }, // vánoční stromek s očima (úzká špička nahoře)
 }
 
 function add(a: HatPlacement, d: Delta | undefined): HatPlacement {
