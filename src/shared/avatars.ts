@@ -1,4 +1,5 @@
-// Player avatars: layered emoji (character + hat) on a coloured circle.
+// Player avatars: layered emoji (character + hat) on a coloured circle. A character is either one
+// emoji or a composite of two (an object with eyes stuck on it, see COMPOSITES below).
 // Everything a client sends is normalised against these lists; the server never trusts raw input.
 
 export interface Avatar {
@@ -9,12 +10,12 @@ export interface Avatar {
 
 // sova, liška, žába, panda, kočka, pes, lev, koala, prase, opice, jednorožec,
 // medvěd, lední medvěd, křeček, králík, myš, tygr, vlk, kuřátko, kráva, kůň,
-// halloweenská dýně, lebka, zeměkoule
+// halloweenská dýně, lebka, zeměkoule s očima, vánoční stromek s očima
 // (new ones go at the end: the join form and e2e tests address characters by index)
 export const CHARACTERS = [
   '🦉', '🦊', '🐸', '🐼', '🐱', '🐶', '🦁', '🐨', '🐷', '🐵', '🦄',
   '🐻', '🐻‍❄️', '🐹', '🐰', '🐭', '🐯', '🐺', '🐥', '🐮', '🐴',
-  '🎃', '💀', '🌍',
+  '🎃', '💀', '🌍👀', '🎄👀',
 ] as const
 // cylindr, koruna, kšiltovka, akademická čepice, mašle, dámský klobouk
 // (new ones go at the end: e2e tests address hats by index)
@@ -61,6 +62,31 @@ export function decodeAvatar(raw: string | null | undefined): Avatar {
   } catch {
     return { ...DEFAULT_AVATAR }
   }
+}
+
+// ---- composite characters ------------------------------------------------------------------
+// An object emoji with a second emoji (eyes) laid over it. The id in CHARACTERS is simply both
+// glyphs joined, so validation, the protocol and storage treat it like any other character.
+// Overlay units are fractions of the base glyph size (positive y = lower), rotation in degrees,
+// scale relative to the base glyph. Tuned visually on the /avatars sheet like the hats.
+
+export interface Overlay {
+  glyph: string
+  x: number
+  y: number
+  r: number
+  s: number
+}
+
+export const COMPOSITES: Record<string, { base: string; overlay: Overlay }> = {
+  '🌍👀': { base: '🌍', overlay: { glyph: '👀', x: 0, y: -0.05, r: 0, s: 0.55 } }, // zeměkoule s očima
+  '🎄👀': { base: '🎄', overlay: { glyph: '👀', x: 0, y: 0.05, r: 0, s: 0.45 } }, // vánoční stromek s očima
+}
+
+/** Splits a character into the glyph drawn underneath and the optional overlay on top. */
+export function characterParts(character: string): { base: string; overlay: Overlay | null } {
+  const composite = COMPOSITES[character]
+  return composite ? { base: composite.base, overlay: composite.overlay } : { base: character, overlay: null }
 }
 
 // ---- hat placement -------------------------------------------------------------------------
@@ -123,7 +149,8 @@ export const HAT_FIT: Record<string, CharacterFit> = {
   '🐴': { base: { x: 0.1, y: 0.05, r: 16, s: 0.8 } }, // kůň (hlava z profilu jako jednorožec)
   '🎃': { base: { y: 0.1 } }, // halloweenská dýně (stopka nahoře)
   '💀': { base: { y: 0.02 } }, // lebka
-  '🌍': { base: { y: 0.02 } }, // zeměkoule
+  '🌍👀': { base: { y: 0.02 } }, // zeměkoule s očima
+  '🎄👀': { base: { y: -0.02, s: 0.8 } }, // vánoční stromek s očima (úzká špička nahoře)
 }
 
 function add(a: HatPlacement, d: Delta | undefined): HatPlacement {

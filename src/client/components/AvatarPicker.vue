@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onBeforeUnmount, ref } from 'vue'
 import { CHARACTERS, COLORS, HATS, randomAvatar, spinDelays, type Avatar } from '../../shared/avatars'
+import CharacterGlyph from './CharacterGlyph.vue'
 import AvatarView from './Avatar.vue'
 
 const model = defineModel<Avatar>({ required: true })
@@ -60,7 +61,7 @@ onBeforeUnmount(() => {
         :data-testid="`avatar-character-${i}`"
         @click="set('character', c)"
       >
-        {{ c }}
+        <CharacterGlyph :character="c" />
       </button>
     </div>
 

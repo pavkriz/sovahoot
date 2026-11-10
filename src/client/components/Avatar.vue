@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { hatPlacement, type Avatar } from '../../shared/avatars'
+import CharacterGlyph from './CharacterGlyph.vue'
 
 const props = withDefaults(defineProps<{ avatar: Avatar; size?: number }>(), { size: 48 })
 
@@ -22,7 +23,7 @@ const hatStyle = computed(() => {
     :title="[avatar.character, avatar.hat].filter(Boolean).join(' ')"
     data-testid="avatar"
   >
-    <span class="character emoji">{{ avatar.character }}</span>
+    <CharacterGlyph class="character" :character="avatar.character" />
     <span v-if="avatar.hat" class="hat emoji" :style="hatStyle">{{ avatar.hat }}</span>
   </span>
 </template>

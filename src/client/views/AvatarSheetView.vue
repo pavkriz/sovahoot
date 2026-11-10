@@ -2,6 +2,7 @@
 // Tuning sheet: every character × hat combination at a large size. Not linked from the UI.
 import { CHARACTERS, COLORS, HATS } from '../../shared/avatars'
 import AvatarView from '../components/Avatar.vue'
+import CharacterGlyph from '../components/CharacterGlyph.vue'
 </script>
 
 <template>
@@ -17,7 +18,7 @@ import AvatarView from '../components/Avatar.vue'
         </thead>
         <tbody>
           <tr v-for="(c, i) in CHARACTERS" :key="c">
-            <th class="emoji">{{ c }}</th>
+            <th><CharacterGlyph :character="c" /></th>
             <td><AvatarView :avatar="{ character: c, hat: null, color: COLORS[i % COLORS.length]! }" :size="128" /></td>
             <td v-for="h in HATS" :key="h">
               <AvatarView :avatar="{ character: c, hat: h, color: COLORS[i % COLORS.length]! }" :size="128" />

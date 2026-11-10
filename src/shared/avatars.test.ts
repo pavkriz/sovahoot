@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { CHARACTERS, COLORS, DEFAULT_AVATAR, DEFAULT_PLACEMENT, decodeAvatar, encodeAvatar, HATS, hatPlacement, normalizeAvatar, randomAvatar, spinDelays } from './avatars'
+import { CHARACTERS, characterParts, COLORS, COMPOSITES, DEFAULT_AVATAR, DEFAULT_PLACEMENT, decodeAvatar, encodeAvatar, HATS, hatPlacement, normalizeAvatar, randomAvatar, spinDelays } from './avatars'
 
 describe('avatars', () => {
   it('normalises unknown parts to defaults and keeps valid ones', () => {
@@ -20,11 +20,33 @@ describe('avatars', () => {
     expect(new Set(HATS).size).toBe(6)
   })
 
-  it('offers 24 distinct characters including the polar bear ZWJ sequence', () => {
-    expect(CHARACTERS).toHaveLength(24)
-    expect(new Set(CHARACTERS).size).toBe(24)
+  it('offers 25 distinct characters including the polar bear ZWJ sequence', () => {
+    expect(CHARACTERS).toHaveLength(25)
+    expect(new Set(CHARACTERS).size).toBe(25)
     expect(CHARACTERS).toContain('🐻‍❄️')
     expect(normalizeAvatar({ character: '🐻‍❄️', hat: null, color: COLORS[0] }).character).toBe('🐻‍❄️')
+  })
+
+  it('defines every composite character consistently', () => {
+    const composites = CHARACTERS.filter((c) => c in COMPOSITES)
+    expect(composites).toEqual(['🌍👀', '🎄👀'])
+    for (const id of Object.keys(COMPOSITES)) {
+      expect(CHARACTERS).toContain(id)
+      const { base, overlay } = COMPOSITES[id]!
+      expect(base + overlay.glyph).toBe(id)
+      expect(Math.abs(overlay.x)).toBeLessThanOrEqual(0.3)
+      expect(Math.abs(overlay.y)).toBeLessThanOrEqual(0.3)
+      expect(overlay.s).toBeGreaterThanOrEqual(0.2)
+      expect(overlay.s).toBeLessThanOrEqual(1)
+      expect(Number.isFinite(overlay.r)).toBe(true)
+    }
+    expect(characterParts('🎄👀')).toEqual({ base: '🎄', overlay: COMPOSITES['🎄👀']!.overlay })
+    expect(characterParts('🦊')).toEqual({ base: '🦊', overlay: null })
+  })
+
+  it('accepts composite characters and drops the retired plain globe', () => {
+    expect(normalizeAvatar({ character: '🎄👀', hat: '🎩', color: COLORS[0] }).character).toBe('🎄👀')
+    expect(normalizeAvatar({ character: '🌍', hat: null, color: COLORS[0] }).character).toBe(DEFAULT_AVATAR.character)
   })
 
   it('generates only valid random avatars', () => {
