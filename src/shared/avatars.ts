@@ -89,7 +89,7 @@ export interface Composite {
 
 export const COMPOSITES: Record<string, Composite> = {
   '🌍👀': { base: '🌍', overlay: { glyph: '👀', x: 0, y: -0.05, r: 0, s: 0.55 } }, // zeměkoule s očima
-  '🎄👀': { base: '🎄', scale: 1.25, overlay: { glyph: '👀', x: 0, y: 0.05, r: 0, s: 0.45 } }, // vánoční stromek s očima
+  '🎄👀': { base: '🎄', scale: 1.25, overlay: { glyph: '👀', x: 0, y: 0.0, r: 0, s: 0.35 } }, // vánoční stromek s očima
 }
 
 /** Splits a character into the glyph drawn underneath and the optional overlay on top. */
@@ -129,7 +129,7 @@ export const DEFAULT_PLACEMENT: HatPlacement = { x: 0, y: 0.1, r: -6, s: 1 }
 export const HAT_DEFAULTS: Record<string, Delta> = {
   '🎩': { r: -2 }, // cylindr
   '👑': { r: 6 }, // koruna
-  '🧢': { x: 0.02, y: 0.06, r: 6 }, // modrá kšiltovka
+  '🧢': { x: -0.01, y: 0.06, r: 6 }, // modrá kšiltovka
   '🎓': { y: 0.04, r: -4 }, // akademická čepice; střapec visí pod deskou, deska musí sedět níž
   '🎀': { x: 0.0, y: 0.15, r: 21, s: 0.6 }, // mašle
   '👒': { y: 0.12, r: -20, s: 1.2 }, // dámský klobouk (široká krempa)
@@ -161,7 +161,7 @@ export const HAT_FIT: Record<string, CharacterFit> = {
   '🎃': { base: { y: 0.1 } }, // halloweenská dýně (stopka nahoře)
   '💀': { base: { y: 0.02 } }, // lebka
   '🌍👀': { base: { y: 0.02 } }, // zeměkoule s očima
-  '🎄👀': { base: { y: -0.06, s: 0.8 } }, // vánoční stromek s očima (úzká špička nahoře)
+  '🎄👀': { base: { y: 0.05, s: 0.8 } }, // vánoční stromek s očima (úzká špička nahoře)
 }
 
 function add(a: HatPlacement, d: Delta | undefined): HatPlacement {
