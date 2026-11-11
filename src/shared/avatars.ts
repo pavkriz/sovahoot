@@ -20,7 +20,8 @@ export const CHARACTERS = [
 // cylindr, koruna, kšiltovka, akademická čepice, mašle, dámský klobouk
 // (new ones go at the end: e2e tests address hats by index)
 export const HATS = ['🎩', '👑', '🧢', '🎓', '🎀', '👒'] as const
-export const COLORS = ['#ffd166', '#06d6a0', '#118ab2', '#47ef58ff', '#8338ec', '#3a86ff', '#fb5607'] as const
+// (new ones go at the end: the join form addresses colours by index)
+export const COLORS = ['#ffd166', '#06d6a0', '#118ab2', '#ef476f', '#8338ec', '#3a86ff', '#fb5607', '#47ef58ff'] as const
 
 export const DEFAULT_AVATAR: Avatar = { character: CHARACTERS[0], hat: null, color: COLORS[0] }
 

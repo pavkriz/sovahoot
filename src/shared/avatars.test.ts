@@ -69,6 +69,13 @@ describe('avatars', () => {
     expect(decodeAvatar('{"character":"💣"}')).toEqual(DEFAULT_AVATAR)
   })
 
+  it('offers 8 distinct colours, both the red and the green', () => {
+    expect(COLORS).toHaveLength(8)
+    expect(new Set(COLORS).size).toBe(8)
+    expect(COLORS).toContain('#ef476f')
+    expect(COLORS).toContain('#47ef58ff')
+  })
+
   it('drops the retired salmon background colour', () => {
     expect(COLORS).not.toContain('#f78c6b')
     expect(normalizeAvatar({ character: '🦊', hat: null, color: '#f78c6b' }).color).toBe(DEFAULT_AVATAR.color)
