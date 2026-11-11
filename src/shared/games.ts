@@ -70,6 +70,25 @@ export const GAMES: Game[] = [
         correctIndex: 3,
         timeLimitSec: 45,
       },
+      {
+        text: 'Koně jsou:',
+        answers: ['Sudokopytníci', 'Lichokopytníci'],
+        correctIndex: 1,
+        timeLimitSec: 20,
+      },
+      {
+        // Ovčí vlna se dál zpracovává na přízi a oblečení, proto surovina.
+        text: 'Vlna je:',
+        answers: ['Přírodnina', 'Surovina', 'Lidský výrobek'],
+        correctIndex: 1,
+        timeLimitSec: 30,
+      },
+      {
+        text: 'Do jaké skupiny patří voda?',
+        answers: ['Živá příroda', 'Neživá příroda', 'Lidský výtvor'],
+        correctIndex: 1,
+        timeLimitSec: 30,
+      },
     ],
   },
 ]
