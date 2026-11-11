@@ -20,7 +20,7 @@ export const CHARACTERS = [
 // cylindr, koruna, kšiltovka, akademická čepice, mašle, dámský klobouk
 // (new ones go at the end: e2e tests address hats by index)
 export const HATS = ['🎩', '👑', '🧢', '🎓', '🎀', '👒'] as const
-export const COLORS = ['#ffd166', '#06d6a0', '#118ab2', '#ef476f', '#8338ec', '#3a86ff', '#fb5607'] as const
+export const COLORS = ['#ffd166', '#06d6a0', '#118ab2', '#47ef58ff', '#8338ec', '#3a86ff', '#fb5607'] as const
 
 export const DEFAULT_AVATAR: Avatar = { character: CHARACTERS[0], hat: null, color: COLORS[0] }
 
@@ -147,7 +147,7 @@ export const HAT_FIT: Record<string, CharacterFit> = {
   '🐨': { base: { y: 0.03 } }, // koala
   '🐷': { base: { y: 0.05 } }, // prase
   '🐵': { base: { y: 0.03 } }, // opice
-  '🦄': { base: { x: 0.1, y: 0.05, r: 16, s: 0.8 } }, // jednorožec
+  '🦄': { base: { x: 0.1, y: 0.08, r: 16, s: 0.8 } }, // jednorožec
   '🐻': { base: { y: 0.07 } }, // medvěd
   '🐻‍❄️': { base: { y: 0.01} }, // lední medvěd
   '🐹': { base: { y: 0.09 } }, // křeček

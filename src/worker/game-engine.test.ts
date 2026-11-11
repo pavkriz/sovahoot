@@ -122,10 +122,10 @@ describe('lobby & joining', () => {
     e.join('p1', 'Alice', { character: '🦊', hat: null, color: '#118ab2' })
     e.join('p2', 'Bob')
     e.setConnected('p1', false)
-    expect(e.join('p1', 'Alenka', { character: '🐼', hat: '👑', color: '#ef476f' })).toEqual({ ok: true })
+    expect(e.join('p1', 'Alenka', { character: '🐼', hat: '👑', color: '#8338ec' })).toEqual({ ok: true })
     expect(e.snapshotFor('host', null, T0).players[0]).toMatchObject({
       nickname: 'Alenka',
-      avatar: { character: '🐼', hat: '👑', color: '#ef476f' },
+      avatar: { character: '🐼', hat: '👑', color: '#8338ec' },
       connected: true,
     })
     // A nickname someone else holds is ignored, the rest still applies.
