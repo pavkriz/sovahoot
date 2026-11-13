@@ -31,7 +31,7 @@ export const GAMES: Game[] = [
         text: 'Petřík dostal pod stromeček 19 dárků. Jeho mladší sestřička Anička dostala o 3 dárky více než Petřík. Kolik dárků dostala pod stromeček Anička?',
         answers: ['16', '19', '22', '3'],
         correctIndex: 2,
-        timeLimitSec: 45,
+        timeLimitSec: 50,
       },
       {
         text: '5 + 42 : 6 =',
@@ -86,6 +86,20 @@ export const GAMES: Game[] = [
       {
         text: 'Do jaké skupiny patří voda?',
         answers: ['Živá příroda', 'Neživá příroda', 'Lidský výtvor'],
+        correctIndex: 1,
+        timeLimitSec: 30,
+      },
+      {
+        // Zbytek je od slovesa zbýt (rodina slova být); obyvatel a příbytek patří k bydlet.
+        text: 'K čemu je „zbytek“ příbuzné slovo?',
+        answers: ['dobytek', 'obyvatel', 'být', 'příbytek'],
+        correctIndex: 2,
+        timeLimitSec: 30,
+      },
+      {
+        // Irský vlkodav má podle standardu nejvyšší minimální kohoutkovou výšku.
+        text: 'Jaké plemeno psa je největší?',
+        answers: ['Německá doga', 'Irský vlkodav', 'Appenzellský salašnický pes', 'Afghánský chrt'],
         correctIndex: 1,
         timeLimitSec: 30,
       },
